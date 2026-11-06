@@ -1,0 +1,39 @@
+# Local Google Cloud on your laptop with Floci (floci-gcp). No GCP account or billing needed.
+#
+#   docker compose up -d floci-gcp            # emulator only; run the app with uvicorn (README)
+#   docker compose --profile app up -d --build   # emulator + RoleReady container
+#
+# Floci emulates Firestore, Firebase Auth, Secret Manager, IAM, Cloud Scheduler, BigQuery and more
+# on port 4588. IAM enforcement is ON here so scripts/iam.py and tests/iam can prove least privilege.
+# Floci is a test tool, not a security boundary, and not a substitute for the real Google Cloud deploy.
+
+services:
+  floci-gcp:
+    image: floci/floci-gcp:latest  # pin a dated release tag once the team picks one
+    ports:
+      - "4588:4588"
+    environment:
+      FLOCI_GCP_DEFAULT_PROJECT_ID: floci-local
+      FLOCI_GCP_SERVICES_IAM_AUTHORIZATION_MODE: enforce
+      FLOCI_GCP_STORAGE_MODE: hybrid
+      FLOCI_GCP_STORAGE_PERSISTENT_PATH: /app/data
+    volumes:
+      - floci-gcp-data:/app/data
+    # No /var/run/docker.sock mount: RoleReady does not need emulated Cloud Run, Cloud SQL or GKE,
+    # and mounting the Docker socket gives the container root-level control of your machine.
+
+  roleready:
+    profiles: ["app"]
+    build: .
+    depends_on: [floci-gcp]
+    ports:
+      - "8000:8080"
+    env_file: .env.floci
+    environment:
+      # Inside the compose network the emulator is reached by service name, not localhost.
+      FIRESTORE_EMULATOR_HOST: floci-gcp:4588
+      FIREBASE_AUTH_EMULATOR_HOST: floci-gcp:4588
+      PORT: "8080"
+
+volumes:
+  floci-gcp-data:

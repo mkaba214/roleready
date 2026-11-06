@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RoleReady</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="bar">
+    <div class="brand"><strong>RoleReady</strong> <span id="ws-name" class="muted"></span></div>
+    <div id="identity" class="identity"></div>
+  </header>
+
+  <main>
+    <div id="toast" class="toast" hidden></div>
+
+    <section id="invite-banner" class="card accent" hidden>
+      <h2>You have an invitation</h2>
+      <p class="muted">Sign in as the invited email, then accept.</p>
+      <button id="banner-accept">Accept invitation</button>
+    </section>
+
+    <div id="signed-out" class="card" hidden>
+      <h2>Sign in to continue</h2>
+      <p class="muted">Pick a demo user above, or sign in with your test account.</p>
+    </div>
+
+    <!-- Owner view -->
+    <div id="owner-view" hidden>
+      <section class="card" id="assistant-card">
+        <h2>Access Assistant <span class="tag">NVIDIA</span></h2>
+        <p class="muted">Describe the access in plain English. The assistant drafts. You review and approve.</p>
+        <textarea id="assistant-input" rows="3" placeholder="Give sam@freelance.test editing and scheduling from Monday 9am to Friday 5pm for the fall launch."></textarea>
+        <div class="row"><button id="assistant-draft">Draft invitation</button><span id="assistant-status" class="muted"></span></div>
+        <ul id="assistant-notes" class="notes"></ul>
+      </section>
+
+      <section class="card">
+        <h2>New invitation</h2>
+        <form id="invite-form" class="grid">
+          <label>Email <input name="invitee_email" type="email" required></label>
+          <label>Role
+            <select name="role">
+              <option value="contributor">Contributor (freelancer)</option>
+              <option value="viewer">Viewer (reviewer)</option>
+            </select>
+          </label>
+          <fieldset id="task-boxes" class="span2"><legend>Tasks</legend></fieldset>
+          <label>Starts <input name="start_at" type="datetime-local" required></label>
+          <label>Ends <input name="expires_at" type="datetime-local" required></label>
+          <label>Time zone <select name="timezone" id="tz-select"></select></label>
+          <label>Reason <input name="reason" maxlength="200" placeholder="Fall launch social posts"></label>
+          <input type="hidden" name="source" value="manual">
+          <div class="row span2">
+            <button type="submit">Create draft invitation</button>
+            <button type="button" id="quick-window" class="ghost">Demo window: now + 3 min</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Invitations</h2>
+        <div id="invite-link" class="link-box" hidden></div>
+        <table><thead><tr><th>Email</th><th>Role</th><th>Tasks</th><th>Window</th><th>Status</th><th></th></tr></thead>
+          <tbody id="invitations"></tbody></table>
+      </section>
+
+      <section class="card">
+        <h2>People with access</h2>
+        <table><thead><tr><th>Email</th><th>Role</th><th>Tasks</th><th>Window</th><th>State</th><th></th></tr></thead>
+          <tbody id="grants"></tbody></table>
+      </section>
+
+      <section class="card">
+        <div class="row between">
+          <h2>Success measures</h2>
+          <button id="metrics-refresh" class="ghost">Refresh</button>
+        </div>
+        <p class="muted">Live from the audit log. The BigQuery + Looker Studio report shows a batch snapshot of the same records.</p>
+        <table><thead><tr><th>Measure</th><th>Target</th><th>Now</th><th>Status</th></tr></thead>
+          <tbody id="metrics"></tbody></table>
+      </section>
+
+      <section class="card">
+        <div class="row between">
+          <h2>Audit history</h2>
+          <div class="row">
+            <button id="audit-refresh" class="ghost">Refresh</button>
+            <button id="audit-verify" class="ghost">Verify chain</button>
+            <button id="run-expiry" class="ghost" hidden>Run expiry job</button>
+          </div>
+        </div>
+        <p id="verify-result" class="muted"></p>
+        <div class="row">
+          <input id="explain-input" placeholder="Ask the assistant: who was denied access today?">
+          <button id="explain-go">Ask</button>
+        </div>
+        <p id="explain-answer" class="answer"></p>
+        <div class="scroll"><table><thead><tr><th>#</th><th>Time</th><th>Actor</th><th>Action</th><th>Target</th><th>Decision</th><th>Reason</th></tr></thead>
+          <tbody id="audit"></tbody></table></div>
+      </section>
+    </div>
+
+    <!-- Freelancer / viewer view -->
+    <div id="member-view" hidden>
+      <section class="card">
+        <h2>Accept an invitation</h2>
+        <div class="row"><input id="accept-token" placeholder="Paste invite token"><button id="accept-go">Accept</button></div>
+      </section>
+      <section class="card">
+        <h2>Your access</h2>
+        <ul id="my-grants" class="plain"></ul>
+      </section>
+      <section class="card">
+        <h2>Try a task</h2>
+        <p class="muted">Each click asks the policy engine. Every answer lands in the owner's audit history.</p>
+        <div id="task-buttons" class="row wrap"></div>
+        <ul id="task-results" class="plain results"></ul>
+      </section>
+    </div>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+# Secrets: never commit
+.env
+.env.*
+!.env.example
+!.env.floci.example
+*.pem
+*.key
+*service-account*.json
+credentials*.json
+
+# Floci local data: each teammate's emulator state stays on their laptop
+data/
+floci-data/
+.floci-gcp.lock
+
+# Teammate emails for IAM (personal data, keep out of the repo)
+infra/iam/team.local.yaml
+
+# Claude Code personal overrides
+.claude/settings.local.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+*.egg-info/
+
+# Outputs
+evals/results/
+poc/results.json
+*.log
+.DS_Store

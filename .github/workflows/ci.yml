@@ -1,0 +1,59 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - run: pip install -r requirements-dev.txt
+      - name: IAM least-privilege lint
+        run: python scripts/iam.py lint
+      - run: pytest
+
+  # Applies infra/iam/iam.yaml to Floci with IAM enforcement on, then proves who can and cannot
+  # reach each secret. continue-on-error until the team has seen it pass once; then remove that line.
+  iam-floci:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    services:
+      floci:
+        image: floci/floci-gcp:latest
+        ports:
+          - 4588:4588
+        env:
+          FLOCI_GCP_SERVICES_IAM_AUTHORIZATION_MODE: enforce
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt
+      - name: Wait for Floci
+        run: for i in $(seq 1 30); do curl -s -o /dev/null http://localhost:4588/ && break; sleep 1; done
+      - name: IAM enforcement tests
+        env:
+          FLOCI_GCP_URL: http://localhost:4588
+        run: pytest tests/iam -v
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # scan the whole history, not just the last commit
+      - name: gitleaks
+        run: |
+          docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.18.4 \
+            detect --source /repo --redact --verbose

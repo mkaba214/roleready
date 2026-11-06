@@ -1,0 +1,6 @@
+# Copy to infra/iam/team.local.yaml (git-ignored) and fill in each teammate's Google account email.
+# Real emails never go in the repo: the showcase repository may be public.
+mohamed: mohamed@example.com
+andrew: andrew@example.com
+ashley: ashley@example.com
+joclyn: joclyn@example.com

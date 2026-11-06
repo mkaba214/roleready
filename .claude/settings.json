@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(pytest *)",
+      "Bash(pytest)",
+      "Bash(python scripts/iam.py lint)",
+      "Bash(python scripts/iam.py plan *)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.floci)",
+      "Read(./.env.local)",
+      "Read(./infra/iam/team.local.yaml)",
+      "Bash(gcloud projects set-iam-policy *)",
+      "Bash(gcloud projects add-iam-policy-binding *)",
+      "Bash(gcloud iam service-accounts keys create *)",
+      "Bash(python scripts/iam.py apply --target gcp *)",
+      "Bash(git push --force *)",
+      "Bash(git push origin main)",
+      "Bash(git push origin main *)",
+      "Bash(gh repo delete *)"
+    ]
+  }
+}

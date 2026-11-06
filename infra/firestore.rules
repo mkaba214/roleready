@@ -1,0 +1,12 @@
+rules_version = '2';
+
+// RoleReady never lets browsers read or write Firestore directly.
+// Only the Cloud Run service (server SDK, IAM role datastore.user) touches the data,
+// and server SDKs are not subject to these rules.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

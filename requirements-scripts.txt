@@ -1,0 +1,4 @@
+# Only for scripts/ (BigQuery export, IAM tool, demo journey). Not installed in the app image.
+-r requirements.txt
+google-cloud-bigquery>=3.25
+pyyaml>=6

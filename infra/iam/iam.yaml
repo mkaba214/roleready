@@ -1,0 +1,96 @@
+# RoleReady IAM as code. Owner: Andrew (Cloud Security). Reviewer: Ashley.
+#
+# This file is the single source of truth for who can do what in the Google Cloud project.
+# Change access only by editing this file in a pull request, then:
+#   python scripts/iam.py lint                                   # least-privilege rules (also runs in CI)
+#   python scripts/iam.py apply --target floci                   # practice locally, enforcement ON
+#   pytest tests/iam                                             # prove it against Floci
+#   python scripts/iam.py plan  --target gcp --project $PROJECT_ID
+#   python scripts/iam.py apply --target gcp --project $PROJECT_ID
+#   python scripts/iam.py audit --target gcp --project $PROJECT_ID   # weekly drift + danger check
+#
+# Members:  sa:<name>      a service account in this file (workloads, no expiry)
+#           person:<name>  a teammate; real emails live in infra/iam/team.local.yaml (git-ignored)
+# People's grants expire automatically at build_ends through an IAM condition. Same idea as RoleReady.
+# The project Owner (whoever created the project) is break-glass only and is not managed here.
+
+version: 1
+build_ends: "2026-12-01T00:00:00Z"
+
+# Log every read of a secret (who fetched the NVIDIA key, when). Real Google Cloud only.
+data_access_logs:
+  - secretmanager.googleapis.com
+
+service_accounts:
+  roleready-run:
+    display_name: RoleReady Cloud Run service
+    purpose: Runs the API. Reads and writes Firestore and reads two secrets. Nothing else.
+  roleready-scheduler:
+    display_name: RoleReady expiry scheduler
+    purpose: Identity inside the OIDC token Cloud Scheduler sends to /jobs/expire. Holds no project roles.
+  roleready-export:
+    display_name: RoleReady BigQuery export
+    purpose: Batch copy of audit events to BigQuery for the Looker Studio report.
+
+team:
+  mohamed:
+    lead_for: Cloud engineering and integration (deploys the service)
+  andrew:
+    lead_for: Permission rules, AI agent, IAM administration
+  ashley:
+    lead_for: Authentication and access lifecycle security (expiry job, Firebase Auth)
+  joclyn:
+    lead_for: Research, success metrics, analytics, agent evaluation, documentation
+
+project_bindings:
+  # Workloads
+  - member: sa:roleready-run
+    roles: [roles/datastore.user]
+  - member: sa:roleready-export
+    roles: [roles/datastore.viewer, roles/bigquery.jobUser, roles/bigquery.dataEditor]
+
+  # People (each expires at build_ends)
+  - member: person:mohamed
+    roles:
+      - roles/run.admin
+      - roles/run.sourceDeveloper
+      - roles/serviceusage.serviceUsageConsumer
+      - roles/cloudscheduler.admin
+      - roles/logging.viewer
+  - member: person:andrew
+    roles:
+      - roles/resourcemanager.projectIamAdmin
+      - roles/iam.serviceAccountAdmin
+      - roles/secretmanager.admin
+      - roles/iam.securityReviewer
+      - roles/logging.privateLogViewer
+  - member: person:ashley
+    roles:
+      - roles/iam.securityReviewer
+      - roles/firebaseauth.admin
+      - roles/cloudscheduler.admin
+      - roles/datastore.viewer
+      - roles/logging.viewer
+  - member: person:joclyn
+    roles:
+      - roles/bigquery.user
+      - roles/datastore.viewer
+
+secret_bindings:
+  nvidia-api-key:
+    - member: sa:roleready-run
+      roles: [roles/secretmanager.secretAccessor]
+  roleready-integration-key:
+    - member: sa:roleready-run
+      roles: [roles/secretmanager.secretAccessor]
+
+# "Act as" a service account is granted on that one account, never project-wide.
+service_account_bindings:
+  roleready-run:
+    - member: person:mohamed
+      roles: [roles/iam.serviceAccountUser]   # deploy Cloud Run with this identity
+  roleready-scheduler:
+    - member: person:mohamed
+      roles: [roles/iam.serviceAccountUser]   # create the scheduler job
+    - member: person:ashley
+      roles: [roles/iam.serviceAccountUser]   # owns the expiry job
