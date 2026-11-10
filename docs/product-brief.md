@@ -129,9 +129,7 @@ RoleReady supports the goals of resilient infrastructure and small-enterprise pa
 
 **Limit:** RoleReady is a prototype; its real-world impact will be tested through user interviews.
 
-## 10. Open Decisions and Risks
-
-The NVIDIA agent's specific function and how it connects to the backend still need to be determined.
+## 10. Risks and Mitigations
 
 Major risks include limited development time, integration complexity, unreliable agent responses, and insufficient evidence about actual small-business needs. The team will prioritize a working end-to-end demonstration, validate assumptions through user testing, and document limitations.
 
@@ -144,13 +142,13 @@ The four-person team will develop and test RoleReady during the October 31-Novem
 - Mohamed leads cloud engineering and integration
 - Andrew leads permission rules and the AI agent
 - Ashley leads authentication and access lifecycle security
-- Andrew and Ashley handle access approval
+- Andrew and Ashley build the invitation approval and revocation flow
 - Joclyn leads research, success metrics, analytics, agent evaluation, and written documentation
 
 **Proposed milestones:**
 
 - **November 4:** Brief drafted (updated Nov 9).
-- **November 6:** Newly Vibecoding Hackathon Prototyping Session.
+- **November 6:** Newly Hackathon Prototyping Session (exploratory only).
 - **November 9-12:** User interviews.
 - **November 13:** Initial user testing and prioritized improvements.
 - **November 20:** Integrated prototype, analytics, and testing evidence.
@@ -165,7 +163,6 @@ The final submission will include a functioning prototype, code repository, test
 This brief is intended to establish a shared understanding of RoleReady's proposed scope and implementation. The team is asked to review and confirm:
 
 - **MVP scope:** Are the proposed roles, permissions, task types, and core user journey appropriate for the BUILD deadline?
-- **NVIDIA integration:** What specific function will the NVIDIA agent perform?
 - **Architecture:** Which Google Cloud services are necessary, and what will the initial deployment approach be?
 - **Analytics:** Is batch-based export to BigQuery and Looker Studio appropriate for the MVP?
 - **Responsibilities and milestones:** Are the proposed assignments and delivery dates achievable?
