@@ -143,7 +143,7 @@ docs/       brief, decisions, architecture, IAM runbook, Newly, threat model, te
 
 | Member | GitHub | Track | Leads (brief §11) | Contributions (update weekly with PR links) |
 | --- | --- | --- | --- | --- |
-| Mohamed Kaba (Team Lead) | [@mkaba214](https://github.com/mkaba214) | Cloud Engineering | Cloud engineering and integration | |
+| Mohamed Kaba (Team Lead) | [@mkaba214](https://github.com/mkaba214) | Cloud Engineering | Cloud engineering and integration | CI hardening: pinned runner, actions and Floci version; surfaced the hidden iam-floci failure |
 | Andrew Hernandez | [@dmandrew01](https://github.com/dmandrew01) | Cloud Cybersecurity | Permission rules, AI agent, IAM | |
 | Ashley Phillips | [@Aphillipstech](https://github.com/Aphillipstech) | Cloud Cybersecurity | Authentication and access lifecycle security | |
 | Joclyn Davis | [@JDenise25](https://github.com/JDenise25) | Cloud Data Analytics | Research, metrics, analytics, agent evaluation, documentation | |
