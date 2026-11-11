@@ -5,7 +5,7 @@ The Nov 4 brief asks the team to confirm five things (section 12). Each row show
 | # | Decision (brief §12) | Recommendation in the code | Status | Decided by / date |
 | --- | --- | --- | --- | --- |
 | D1 | MVP scope: roles, permissions, task types, journey | 3 roles, 5 task types, matrix in `app/policy.py`, time zone on every invitation | Proposed | |
-| D2 | Newly integration | Newly builds the mobile front end. Its backend calls the RoleReady API server to server with an integration key from Secret Manager. Owner actions over Newly stay off unless `INTEGRATION_ALLOW_OWNER=true`. See `docs/newly-integration.md` | Proposed | |
+| D2 | Newly integration | Not adopted. Newly was used only for the Nov 6 hackathon prototype; the BUILD handbook requires only Google Cloud and NVIDIA. `docs/newly-integration.md` is no longer part of the MVP | Decided | Team, Nov 9 |
 | D3 | Architecture and deployment | Cloud Run + Firestore + Firebase Auth + Cloud Scheduler + Secret Manager. Local development and IAM testing on Floci (floci-gcp). Real Google Cloud for the demo and the final submission | Proposed | |
 | D4 | Analytics | Live success measures in the app (`GET /metrics`), plus a nightly batch export to BigQuery for Looker Studio (`scripts/export_bigquery.py`) | Proposed | |
 | D5 | Responsibilities and milestones | Leads as listed in the brief §11. Each lead owns the matching Claude Code prompt in the setup guide | Proposed | |
