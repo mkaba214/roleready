@@ -7,12 +7,15 @@ on:
 permissions:
   contents: read
 
+# Runner, actions and Floci are pinned so CI behaves the same until the Nov 28 deadline.
+# ubuntu-latest moves to Ubuntu 26 and the v4/v5 actions run on the retired Node 20.
+
 jobs:
   tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
           cache: pip
@@ -23,20 +26,21 @@ jobs:
       - run: pytest
 
   # Applies infra/iam/iam.yaml to Floci with IAM enforcement on, then proves who can and cannot
-  # reach each secret. continue-on-error until the team has seen it pass once; then remove that line.
+  # reach each secret. continue-on-error stays until test_time_boxed_grant_stops_working_after_it_expires
+  # passes on Floci (it fails on every run so far); then remove that line so a red job blocks merges.
   iam-floci:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     continue-on-error: true
     services:
       floci:
-        image: floci/floci-gcp:latest
+        image: floci/floci-gcp:0.12.0 # same image that :latest pointed to on Nov 10; keep in step with docker-compose.yml
         ports:
           - 4588:4588
         env:
           FLOCI_GCP_SERVICES_IAM_AUTHORIZATION_MODE: enforce
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       - run: pip install -r requirements-dev.txt
@@ -48,9 +52,9 @@ jobs:
         run: pytest tests/iam -v
 
   secret-scan:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # scan the whole history, not just the last commit
       - name: gitleaks
