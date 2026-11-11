@@ -47,7 +47,7 @@ def mutate(spec: dict, section: str, entry: dict) -> list[str]:
     [
         ({"member": "person:joclyn", "roles": ["roles/editor"]}, "basic roles"),
         ({"member": "person:mohamed", "roles": ["roles/owner"]}, "basic roles"),
-        ({"member": "person:ashley", "roles": ["roles/iam.serviceAccountTokenCreator"]}, "impersonate"),
+        ({"member": "person:joclyn", "roles": ["roles/iam.serviceAccountTokenCreator"]}, "impersonate"),
         ({"member": "person:mohamed", "roles": ["roles/iam.serviceAccountKeyAdmin"]}, "impersonate"),
         ({"member": "person:mohamed", "roles": ["roles/iam.serviceAccountUser"]}, "never project-wide"),
         ({"member": "person:joclyn", "roles": ["roles/secretmanager.secretAccessor"]}, "only the Cloud Run service account"),

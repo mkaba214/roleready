@@ -1,4 +1,4 @@
-# RoleReady IAM as code. Owner: Andrew (Cloud Security). Reviewer: Ashley.
+# RoleReady IAM as code. Owner: Andrew (Cloud Security). Reviewer: Mohamed.
 #
 # This file is the single source of truth for who can do what in the Google Cloud project.
 # Change access only by editing this file in a pull request, then:
@@ -37,8 +37,6 @@ team:
     lead_for: Cloud engineering and integration (deploys the service)
   andrew:
     lead_for: Permission rules, AI agent, IAM administration
-  ashley:
-    lead_for: Authentication and access lifecycle security (expiry job, Firebase Auth)
   joclyn:
     lead_for: Research, success metrics, analytics, agent evaluation, documentation
 
@@ -64,13 +62,6 @@ project_bindings:
       - roles/secretmanager.admin
       - roles/iam.securityReviewer
       - roles/logging.privateLogViewer
-  - member: person:ashley
-    roles:
-      - roles/iam.securityReviewer
-      - roles/firebaseauth.admin
-      - roles/cloudscheduler.admin
-      - roles/datastore.viewer
-      - roles/logging.viewer
   - member: person:joclyn
     roles:
       - roles/bigquery.user
@@ -92,5 +83,3 @@ service_account_bindings:
   roleready-scheduler:
     - member: person:mohamed
       roles: [roles/iam.serviceAccountUser]   # create the scheduler job
-    - member: person:ashley
-      roles: [roles/iam.serviceAccountUser]   # owns the expiry job

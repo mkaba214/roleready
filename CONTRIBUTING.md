@@ -6,12 +6,11 @@ Repository: `https://github.com/mkaba214/roleready` (owner: Mohamed, Team Lead).
 
 | Teammate | GitHub username | Repo access | Reviews (`.github/CODEOWNERS`) |
 | --- | --- | --- | --- |
-| Mohamed Kaba (Team Lead) | [@mkaba214](https://github.com/mkaba214) | Owner (settings, invites, branch protection) | Deploy scripts, Dockerfile, Compose, analytics |
+| Mohamed Kaba (Team Lead) | [@mkaba214](https://github.com/mkaba214) | Owner (settings, invites, branch protection) | IAM, policy, auth, CI, Claude Code rules, deploy scripts, Dockerfile, Compose, analytics |
 | Andrew Hernandez | [@dmandrew01](https://github.com/dmandrew01) | Collaborator (push branches, open and merge PRs) | IAM, policy, auth, CI, Claude Code rules, agent, evals, deploy |
-| Ashley Phillips | [@Aphillipstech](https://github.com/Aphillipstech) | Collaborator | IAM, policy, auth, CI, Claude Code rules |
 | Joclyn Davis | [@JDenise25](https://github.com/JDenise25) | Collaborator | Agent, evals, BigQuery export, metrics |
 
-Every teammate reviews anything not listed. Mention a teammate in a pull request or comment with their username, for example `@Aphillipstech please review the expiry test`.
+Every teammate reviews anything not listed. Mention a teammate in a pull request or comment with their username, for example `@dmandrew01 please review the expiry test`.
 
 ## One-time setup (each teammate)
 
@@ -30,7 +29,7 @@ gh auth login        # GitHub.com, HTTPS, log in with a web browser
 gh auth setup-git    # lets git push and pull with that sign-in
 ```
 
-4. **Accept the invitation** in your email or at `https://github.com/mkaba214/roleready/invitations`. Mohamed invites @dmandrew01, @Aphillipstech and @JDenise25 (the setup script does this).
+4. **Accept the invitation** in your email or at `https://github.com/mkaba214/roleready/invitations`. Mohamed invites @dmandrew01 and @JDenise25 (the setup script does this).
 5. **Clone and set up:**
 
 ```bash
@@ -45,19 +44,19 @@ pytest
 
 ```bash
 git switch main && git pull                              # start from the latest main
-git switch -c ashley/invite-rate-limit                   # branch: <your-name>/<topic>
+git switch -c andrew/invite-rate-limit                   # branch: <your-name>/<topic>
 # ... make the change (Claude Code is fine) ...
 pytest && python scripts/iam.py lint                     # must pass
 git status                                               # check: no .env, no data/, no team.local.yaml
 git add -A && git commit -m "Rate-limit failed invite accepts"
-git push -u origin ashley/invite-rate-limit
+git push -u origin andrew/invite-rate-limit
 gh pr create --fill --base main                          # or click "Compare & pull request" on GitHub
 ```
 
 Then:
 
 - CI runs `tests`, `secret-scan` and `iam-floci`. Fix anything red by pushing more commits to the same branch.
-- GitHub asks the code owners in `.github/CODEOWNERS` to review. IAM, policy and auth files need Andrew (@dmandrew01) or Ashley (@Aphillipstech).
+- GitHub asks the code owners in `.github/CODEOWNERS` to review. IAM, policy and auth files need Andrew (@dmandrew01) or Mohamed (@mkaba214).
 - After one approval and green checks, click **Squash and merge**. The branch deletes itself.
 - Everyone else runs `git switch main && git pull` to get it.
 
