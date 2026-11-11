@@ -14,7 +14,7 @@ RoleReady gives a small business owner time-boxed, least-privilege access contro
 
 ## Map
 
-- `app/policy.py` pure permission rules (deny by default, clock passed in). `app/services.py` business logic and audit. `app/main.py` routes. `app/agent.py` + `app/llm.py` NVIDIA Access Assistant. `app/auth.py` Firebase, demo and Newly integration sign-in. `app/store/` memory and Firestore.
+- `app/policy.py` pure permission rules (deny by default, clock passed in). `app/services.py` business logic and audit. `app/main.py` routes. `app/agent.py` + `app/llm.py` NVIDIA Access Assistant. `app/auth.py` Firebase, demo and server-to-server integration sign-in. `app/store/` memory and Firestore.
 - `infra/iam/iam.yaml` every IAM grant. `scripts/iam.py` lint, plan, apply, audit. `infra/*.sh` setup, deploy, scheduler.
 - `evals/` 30-case agent eval (brief target 27 of 30). `docs/` runbooks and templates.
 

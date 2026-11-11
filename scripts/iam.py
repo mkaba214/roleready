@@ -17,7 +17,7 @@ Safety
   * Apply only ADDS. It never removes a binding: drift is reported, and you remove it by hand
     after review (gcloud ... remove-iam-policy-binding), so a typo cannot lock the team out.
   * Every write uses the policy etag (read-modify-write), so concurrent edits fail instead of clobbering.
-  * Secret VALUES are never created on gcp. infra/setup.sh and docs/newly-integration.md do that.
+  * Secret VALUES are never created on gcp. infra/setup.sh does that (the optional integration key is created by hand with gcloud secrets create).
 """
 
 from __future__ import annotations
@@ -431,7 +431,7 @@ def apply_plan(cloud: Cloud, spec: dict[str, Any], plan: Plan) -> list[str]:
             done.append(f"created Floci secret {secret} with a placeholder value")
     for rp in plan.resources:
         if rp.kind == "secret" and rp.resource in plan.missing_secrets and cloud.target == "gcp":
-            done.append(f"SKIPPED secret {rp.resource}: create it first (infra/setup.sh or docs/newly-integration.md)")
+            done.append(f"SKIPPED secret {rp.resource}: create it first (infra/setup.sh, or gcloud secrets create for the integration key)")
             continue
         if not rp.add and not rp.missing_audit_logs:
             continue
