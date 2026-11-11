@@ -1,7 +1,7 @@
 """Score the Access Assistant on evals/eval_set.jsonl.
 
   export NVIDIA_API_KEY=nvapi-...
-  python -m evals.run_eval --model nvidia/nemotron-3-super-120b-a12b
+  python -m evals.run_eval --model nvidia/nemotron-3.5-lightning-30b-a3b
   python -m evals.run_eval --model <second model> --limit 5
 
 Each case expects one of:
@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import Any
 
 from app.agent import AccessAssistant, DraftResult
+from app.config import Settings
 from app.llm import NvidiaClient
 
 HERE = Path(__file__).parent
@@ -88,14 +89,20 @@ def load_cases(path: Path = HERE / "eval_set.jsonl") -> list[dict[str, Any]]:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", default=os.environ.get("NVIDIA_MODEL", "nvidia/nemotron-3-super-120b-a12b"))
+    parser.add_argument("--model", default=os.environ.get("NVIDIA_MODEL", "nvidia/nemotron-3.5-lightning-30b-a3b"))
     parser.add_argument("--limit", type=int, default=0)
     args = parser.parse_args()
 
     key = os.environ.get("NVIDIA_API_KEY", "")
     if not key:
         raise SystemExit("Set NVIDIA_API_KEY first.")
-    client = NvidiaClient(key, args.model, os.environ.get("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1"), timeout=60)
+    client = NvidiaClient(
+        key,
+        args.model,
+        os.environ.get("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1"),
+        timeout=60,
+        disable_thinking=Settings.from_env().nvidia_disable_thinking,
+    )
     cases = load_cases()[: args.limit or None]
     report = run(AccessAssistant(client), cases)
     report["model"] = args.model

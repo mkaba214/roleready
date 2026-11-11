@@ -108,12 +108,31 @@ def test_long_and_empty_input_never_reach_the_model() -> None:
 
 
 def test_llm_error_is_reported_not_raised() -> None:
-    class Broken:
-        def complete(self, *a, **k):
-            raise LLMError("NVIDIA API returned HTTP 503")
-
-    result = AccessAssistant(Broken()).draft_invitation("give sam view access", NOW)
+    result = AccessAssistant(_Broken()).draft_invitation("give sam view access", NOW)
     assert not result.ok and "assistant unavailable" in result.errors[0]
+
+
+class _Broken:
+    def complete(self, *a, **k):
+        raise LLMError("NVIDIA API returned HTTP 404")
+
+
+@pytest.mark.parametrize(
+    "llm, model, attempts",
+    [
+        (_Broken(), None, 1),  # API error
+        (FakeLLM(["nope", "still nope"]), "fake/model", 2),  # no JSON after the retry
+        (FakeLLM([{**GOOD, "task_types": "edit_drafts"}]), "fake/model", 1),  # wrong shape
+    ],
+)
+def test_failure_paths_keep_every_field_in_place(llm, model, attempts) -> None:
+    """Issue #4: error returns skipped `warnings`, so model, attempts and latency landed one field over."""
+    result = AccessAssistant(llm).draft_invitation("give sam view access", NOW)
+    assert not result.ok and result.draft is None and result.errors
+    assert result.warnings == []
+    assert result.model == model
+    assert result.attempts == attempts
+    assert isinstance(result.latency_ms, int) and result.latency_ms >= 0
 
 
 def test_extract_json_rejects_non_objects() -> None:
@@ -219,3 +238,32 @@ def test_nvidia_client_gives_up_after_retries() -> None:
 def test_nvidia_client_requires_key() -> None:
     with pytest.raises(ValueError):
         NvidiaClient("", "m")
+
+
+def _payloads(**client_kwargs) -> list[dict]:
+    sent: list[dict] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        sent.append(__import__("json").loads(request.content))
+        return nvidia_reply("{}")
+
+    NvidiaClient("k", "m", transport=httpx.MockTransport(handler), sleep=lambda s: None, **client_kwargs).complete("s", "u")
+    return sent
+
+
+def test_nvidia_client_turns_reasoning_off_by_default() -> None:
+    """Issue #4: reasoning models spent all of max_tokens thinking and returned empty content."""
+    assert _payloads()[0]["chat_template_kwargs"] == {"enable_thinking": False}
+
+
+def test_nvidia_client_can_leave_reasoning_on() -> None:
+    assert "chat_template_kwargs" not in _payloads(disable_thinking=False)[0]
+
+
+def test_reasoning_setting_comes_from_env(monkeypatch) -> None:
+    from app.config import Settings
+
+    monkeypatch.delenv("NVIDIA_DISABLE_THINKING", raising=False)
+    assert Settings.from_env().nvidia_disable_thinking is True
+    monkeypatch.setenv("NVIDIA_DISABLE_THINKING", "false")
+    assert Settings.from_env().nvidia_disable_thinking is False

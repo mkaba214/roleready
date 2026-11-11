@@ -46,11 +46,15 @@ class NvidiaClient:
         max_retries: int = 3,
         transport: httpx.BaseTransport | None = None,
         sleep: Callable[[float], None] = time.sleep,
+        disable_thinking: bool = True,
     ) -> None:
         if not api_key:
             raise ValueError("NVIDIA_API_KEY is not set")
         self.model = model
         self.max_retries = max_retries
+        # Reasoning models (e.g. Nemotron) otherwise spend the whole max_tokens budget on hidden
+        # reasoning and return empty content. If a model rejects the field, set NVIDIA_DISABLE_THINKING=false.
+        self.disable_thinking = disable_thinking
         self._sleep = sleep
         self._http = httpx.Client(
             base_url=base_url.rstrip("/"),
@@ -76,6 +80,8 @@ class NvidiaClient:
             "max_tokens": max_tokens,
             "stream": False,
         }
+        if self.disable_thinking:
+            payload["chat_template_kwargs"] = {"enable_thinking": False}
         started = time.monotonic()
         attempts = self.max_retries + 1
         for attempt in range(1, attempts + 1):

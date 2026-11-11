@@ -175,7 +175,9 @@ class AccessAssistant:
             try:
                 result = self.llm.complete(system, user, max_tokens=1024, temperature=0.2)
             except LLMError as exc:
-                return DraftResult(False, None, [f"assistant unavailable: {exc}"], None, attempts, _ms(started))
+                return DraftResult(
+                    False, None, [f"assistant unavailable: {exc}"], attempts=attempts, latency_ms=_ms(started)
+                )
             model = result.model
             try:
                 raw = extract_json(result.text)
@@ -183,12 +185,21 @@ class AccessAssistant:
             except (ValueError, json.JSONDecodeError):
                 raw = None
         if raw is None:
-            return DraftResult(False, None, ["could not draft; fill in the form instead"], model, attempts, _ms(started))
+            return DraftResult(
+                False,
+                None,
+                ["could not draft; fill in the form instead"],
+                model=model,
+                attempts=attempts,
+                latency_ms=_ms(started),
+            )
 
         try:
             loose = _LooseDraft.model_validate(raw)
         except Exception:
-            return DraftResult(False, None, ["draft had the wrong shape"], model, attempts, _ms(started))
+            return DraftResult(
+                False, None, ["draft had the wrong shape"], model=model, attempts=attempts, latency_ms=_ms(started)
+            )
 
         errors: list[str] = []
         email = (loose.invitee_email or "").strip().lower()
@@ -214,7 +225,9 @@ class AccessAssistant:
             "timezone": draft_tz.key,
             "reason": (loose.reason or "").strip()[:200],
         }
-        return DraftResult(not errors, draft, errors, warnings, model, attempts, _ms(started))
+        return DraftResult(
+            not errors, draft, errors, warnings, model=model, attempts=attempts, latency_ms=_ms(started)
+        )
 
     # Tool 2 ----------------------------------------------------------------
     def explain_audit(self, question: str, events: list[AuditEvent], timezone: str | None = None) -> ExplainResult:
