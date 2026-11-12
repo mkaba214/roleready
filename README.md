@@ -31,7 +31,7 @@ These sources give context. Interviews and usability tests check how often small
 
 ## Architecture
 
-Cloud Run (FastAPI) · Firestore · Firebase Authentication · Cloud Scheduler (OIDC) · Secret Manager · BigQuery + Looker Studio · NVIDIA NIM API · Newly mobile front end (proposed). Local development and IAM testing run on [Floci](https://floci.io/gcp/), a Google Cloud emulator. Details: [docs/architecture.md](docs/architecture.md).
+Cloud Run (FastAPI) · Firestore · Firebase Authentication · Cloud Scheduler (OIDC) · Secret Manager · BigQuery + Looker Studio · NVIDIA NIM API. Local development and IAM testing run on [Floci](https://floci.io/gcp/), a Google Cloud emulator. Details: [docs/architecture.md](docs/architecture.md).
 
 ## Start here
 
@@ -74,7 +74,7 @@ FLOCI_GCP_URL=http://localhost:4588 pytest tests/iam -v   # 19 IAM enforcement t
 python -m evals.run_eval                        # 30-case agent eval, brief target 27 of 30 (needs NVIDIA_API_KEY)
 ```
 
-Coverage: the permission matrix, a 60-case role x task x state grid, time-window edges, idempotent expiry, revoke/expire races, audit tampering, auth back doors, the Newly integration path, time zones, the success-measures dashboard, prompt injection, NVIDIA client retries, and IAM least privilege. See [docs/test-results.md](docs/test-results.md).
+Coverage: the permission matrix, a 60-case role x task x state grid, time-window edges, idempotent expiry, revoke/expire races, audit tampering, auth back doors, the server-to-server integration path, time zones, the success-measures dashboard, prompt injection, NVIDIA client retries, and IAM least privilege. See [docs/test-results.md](docs/test-results.md).
 
 ## NVIDIA setup
 
@@ -98,10 +98,6 @@ Set a $10 budget alert in Billing, Budgets & alerts. IAM details: [docs/iam-runb
 
 Dashboard data: `pip install -r requirements-scripts.txt && python scripts/export_bigquery.py --project $PROJECT_ID` (add `--emulator http://localhost:4588` to practice on Floci), then build Looker Studio charts from [scripts/metrics.sql](scripts/metrics.sql).
 
-## Newly
-
-Newly builds the mobile front end. Its backend calls RoleReady server to server with an integration key from Secret Manager; owner actions over Newly are off by default. Setup, API table and a ready prompt for the Newly agent: [docs/newly-integration.md](docs/newly-integration.md).
-
 ## Security design
 
 - Deny by default. Access needs an active grant, `start_at <= now < expires_at`, no revocation, and a role and grant that both include the task.
@@ -121,7 +117,7 @@ evals/      30-case agent eval set and runner
 poc/        agent proof of concept
 scripts/    iam.py, floci_seed.py, demo_journey.py, export_bigquery.py, metrics.sql
 infra/      setup.sh, deploy.sh, scheduler.sh, firestore.rules, iam/iam.yaml
-docs/       brief, decisions, architecture, IAM runbook, Newly, threat model, test results, feedback log, demo script
+docs/       brief, decisions, architecture, IAM runbook, threat model, test results, feedback log, demo script
 ```
 
 ## Sample inputs
@@ -144,6 +140,5 @@ docs/       brief, decisions, architecture, IAM runbook, Newly, threat model, te
 | Member | GitHub | Track | Leads (brief §11) | Contributions (update weekly with PR links) |
 | --- | --- | --- | --- | --- |
 | Mohamed Kaba (Team Lead) | [@mkaba214](https://github.com/mkaba214) | Cloud Engineering | Cloud engineering and integration | CI hardening: pinned runner, actions and Floci version; surfaced the hidden iam-floci failure |
-| Andrew Hernandez | [@dmandrew01](https://github.com/dmandrew01) | Cloud Cybersecurity | Permission rules, AI agent, IAM | |
-| Ashley Phillips | [@Aphillipstech](https://github.com/Aphillipstech) | Cloud Cybersecurity | Authentication and access lifecycle security | |
+| Andrew Hernandez | [@dmandrew01](https://github.com/dmandrew01) | Cloud Cybersecurity | Permission rules, AI agent, IAM, authentication and access lifecycle security | |
 | Joclyn Davis | [@JDenise25](https://github.com/JDenise25) | Cloud Data Analytics | Research, metrics, analytics, agent evaluation, documentation | |

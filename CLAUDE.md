@@ -1,6 +1,6 @@
 # RoleReady: instructions for Claude Code
 
-RoleReady gives a small business owner time-boxed, least-privilege access control for freelancers, with an NVIDIA-powered Access Assistant and a tamper-evident audit log. GCLP BUILD capstone, team of four, final PR due Nov 28, 2026 11:59 PM ET. Product brief: `docs/product-brief.md`. Open decisions: `docs/decisions.md`.
+RoleReady gives a small business owner time-boxed, least-privilege access control for freelancers, with an NVIDIA-powered Access Assistant and a tamper-evident audit log. GCLP BUILD capstone, team of three, final PR due Nov 28, 2026 11:59 PM ET. Product brief: `docs/product-brief.md`. Open decisions: `docs/decisions.md`.
 
 ## Commands
 
@@ -14,7 +14,7 @@ RoleReady gives a small business owner time-boxed, least-privilege access contro
 
 ## Map
 
-- `app/policy.py` pure permission rules (deny by default, clock passed in). `app/services.py` business logic and audit. `app/main.py` routes. `app/agent.py` + `app/llm.py` NVIDIA Access Assistant. `app/auth.py` Firebase, demo and Newly integration sign-in. `app/store/` memory and Firestore.
+- `app/policy.py` pure permission rules (deny by default, clock passed in). `app/services.py` business logic and audit. `app/main.py` routes. `app/agent.py` + `app/llm.py` NVIDIA Access Assistant. `app/auth.py` Firebase, demo and server-to-server integration sign-in. `app/store/` memory and Firestore.
 - `infra/iam/iam.yaml` every IAM grant. `scripts/iam.py` lint, plan, apply, audit. `infra/*.sh` setup, deploy, scheduler.
 - `evals/` 30-case agent eval (brief target 27 of 30). `docs/` runbooks and templates.
 
@@ -31,4 +31,4 @@ RoleReady gives a small business owner time-boxed, least-privilege access contro
 
 ## Team owners
 
-Mohamed (@mkaba214): cloud engineering, deploy, CI. Andrew (@dmandrew01): permission rules, Access Assistant, IAM. Ashley (@Aphillipstech): Firebase Auth, invite tokens, revoke, expiry job, threat model. Joclyn (@JDenise25): research, metrics, BigQuery + Looker Studio, evals, written docs. Reviewers per path: `.github/CODEOWNERS`.
+Mohamed (@mkaba214): cloud engineering, deploy, CI. Andrew (@dmandrew01): permission rules, Access Assistant, IAM, Firebase Auth, invite tokens, revoke, expiry job, threat model. Joclyn (@JDenise25): research, metrics, BigQuery + Looker Studio, evals, written docs. Reviewers per path: `.github/CODEOWNERS`.

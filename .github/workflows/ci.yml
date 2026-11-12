@@ -26,11 +26,9 @@ jobs:
       - run: pytest
 
   # Applies infra/iam/iam.yaml to Floci with IAM enforcement on, then proves who can and cannot
-  # reach each secret. continue-on-error stays until test_time_boxed_grant_stops_working_after_it_expires
-  # passes on Floci (it fails on every run so far); then remove that line so a red job blocks merges.
+  # reach each secret. A failure here turns the PR red (no continue-on-error since #2 was fixed).
   iam-floci:
     runs-on: ubuntu-24.04
-    continue-on-error: true
     services:
       floci:
         image: floci/floci-gcp:0.12.0 # same image that :latest pointed to on Nov 10; keep in step with docker-compose.yml

@@ -59,7 +59,7 @@ The policy engine decides access. The agent only proposes.
 | `POST /jobs/expire` | Cloud Scheduler service account only (OIDC) |
 | `POST /dev/run-expiry` | Owner, demo mode only |
 
-Any endpoint can also be called by a trusted server integration (the Newly Backend) with `X-RoleReady-Integration-Key` and `X-Acting-User`. The same rules apply to the acting user, audit events record `via: newly`, and owner actions over the integration are off unless `INTEGRATION_ALLOW_OWNER=true`. See `docs/newly-integration.md`.
+Any endpoint can also be called by a trusted server integration (the Newly Backend) with `X-RoleReady-Integration-Key` and `X-Acting-User`. The same rules apply to the acting user, audit events record `via: newly`, and owner actions over the integration are off unless `INTEGRATION_ALLOW_OWNER=true`.
 
 ## Local cloud (Floci)
 

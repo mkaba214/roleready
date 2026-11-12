@@ -135,14 +135,14 @@ Major risks include limited development time, integration complexity, unreliable
 
 ## 11. Project Timeline and Responsibilities
 
-The four-person team will develop and test RoleReady during the October 31-November 28 BUILD period.
+The team (four members until Ashley left on November 10, now three) will develop and test RoleReady during the October 31-November 28 BUILD period.
 
 **Andrew's BUILD plan proposes the following leads, subject to team confirmation.**
 
 - Mohamed leads cloud engineering and integration
 - Andrew leads permission rules and the AI agent
-- Ashley leads authentication and access lifecycle security
-- Andrew and Ashley build the invitation approval and revocation flow
+- Andrew leads authentication and access lifecycle security (from Ashley, who left the team on November 10)
+- Andrew builds the invitation approval and revocation flow
 - Joclyn leads research, success metrics, analytics, agent evaluation, and written documentation
 
 **Proposed milestones:**

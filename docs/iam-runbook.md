@@ -11,7 +11,6 @@ Your job: decide who and what can touch the Google Cloud project, apply it, prov
 | `roleready-export` (BigQuery batch) | datastore.viewer, bigquery.jobUser, bigquery.dataEditor | project | never |
 | Mohamed (deployer) | run.admin, run.sourceDeveloper, serviceUsageConsumer, cloudscheduler.admin, logging.viewer; serviceAccountUser | project; on run + scheduler accounts only | Dec 1 |
 | Andrew (IAM admin) | projectIamAdmin, serviceAccountAdmin, secretmanager.admin, securityReviewer, privateLogViewer | project | Dec 1 |
-| Ashley (auth and lifecycle) | securityReviewer, firebaseauth.admin, cloudscheduler.admin, datastore.viewer, logging.viewer; serviceAccountUser | project; on scheduler account only | Dec 1 |
 | Joclyn (analytics) | bigquery.user, datastore.viewer | project | Dec 1 |
 | Project Owner (whoever created it) | owner | project | break-glass only, not managed by iam.yaml |
 

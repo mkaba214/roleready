@@ -43,7 +43,7 @@ INTEGRATION_ALLOW_OWNER: "${INTEGRATION_ALLOW_OWNER:-false}"
 CORS_ALLOWED_ORIGINS: "${CORS_ALLOWED_ORIGINS:-}"
 EOF
 
-# Secrets are mounted as env vars. The Newly integration key is optional (docs/newly-integration.md).
+# Secrets are mounted as env vars. The integration key is optional: create the roleready-integration-key secret to turn it on.
 SECRETS="NVIDIA_API_KEY=nvidia-api-key:latest"
 if gcloud secrets describe roleready-integration-key --project "$PROJECT_ID" >/dev/null 2>&1; then
   SECRETS="${SECRETS},INTEGRATION_API_KEY=roleready-integration-key:latest"
