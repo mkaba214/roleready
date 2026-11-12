@@ -24,9 +24,10 @@ class Settings:
     invite_ttl_hours: int = 72
 
     nvidia_api_key: str = ""
-    nvidia_model: str = "nvidia/nemotron-3-super-120b-a12b"
+    nvidia_model: str = "nvidia/nemotron-3.5-lightning-30b-a3b"
     nvidia_base_url: str = "https://integrate.api.nvidia.com/v1"
     nvidia_timeout_seconds: float = 15.0
+    nvidia_disable_thinking: bool = True  # reasoning off, or the reply can come back empty (issue #4)
 
     scheduler_audience: str = ""  # the Cloud Run service URL
     scheduler_service_account: str = ""  # email of the Cloud Scheduler service account
@@ -66,6 +67,7 @@ class Settings:
             nvidia_model=e("NVIDIA_MODEL", cls.nvidia_model).strip(),
             nvidia_base_url=e("NVIDIA_BASE_URL", cls.nvidia_base_url).rstrip("/"),
             nvidia_timeout_seconds=float(e("NVIDIA_TIMEOUT_SECONDS", str(cls.nvidia_timeout_seconds))),
+            nvidia_disable_thinking=_bool("NVIDIA_DISABLE_THINKING", cls.nvidia_disable_thinking),
             scheduler_audience=e("SCHEDULER_AUDIENCE", "").strip(),
             scheduler_service_account=e("SCHEDULER_SERVICE_ACCOUNT", "").strip().lower(),
             firebase_project_id=e("FIREBASE_PROJECT_ID", e("GOOGLE_CLOUD_PROJECT", "")).strip(),

@@ -82,6 +82,7 @@ def create_app(
             settings.nvidia_model,
             settings.nvidia_base_url,
             timeout=settings.nvidia_timeout_seconds,
+            disable_thinking=settings.nvidia_disable_thinking,
         )
     assistant = AccessAssistant(llm, settings.default_timezone) if llm else None
     app.state.assistant = assistant

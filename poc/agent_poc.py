@@ -16,6 +16,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from app.agent import AccessAssistant
+from app.config import Settings
 from app.llm import NvidiaClient
 
 REQUESTS = [
@@ -29,13 +30,14 @@ REQUESTS = [
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", default=os.environ.get("NVIDIA_MODEL", "nvidia/nemotron-3-super-120b-a12b"))
+    parser.add_argument("--model", default=os.environ.get("NVIDIA_MODEL", "nvidia/nemotron-3.5-lightning-30b-a3b"))
     args = parser.parse_args()
     key = os.environ.get("NVIDIA_API_KEY")
     if not key:
         raise SystemExit("Set NVIDIA_API_KEY first (build.nvidia.com -> Settings -> API Keys).")
 
-    assistant = AccessAssistant(NvidiaClient(key, args.model, timeout=60))
+    client = NvidiaClient(key, args.model, timeout=60, disable_thinking=Settings.from_env().nvidia_disable_thinking)
+    assistant = AccessAssistant(client)
     now = datetime.now(timezone.utc)
     results = []
     for text in REQUESTS:

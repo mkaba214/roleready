@@ -40,6 +40,62 @@ def test_good_draft() -> None:
     assert "America/Chicago" in system
 
 
+def test_prompt_gives_the_model_a_calendar() -> None:
+    """Eval Nov 10: the model resolved "Friday" and "Wednesday" to past dates. A dated list fixes the math."""
+    _, llm = draft([GOOD])
+    system = llm.calls[0][0]
+    assert "Sunday 2026-11-08 (today)" in system  # NOW is Sunday 08:00 in Chicago
+    assert "Monday 2026-11-09 (tomorrow)" in system and "Friday 2026-11-13" in system
+    assert "Saturday 2026-11-21" in system  # two weeks ahead
+    assert "2026-11-07" not in system  # nothing before today
+
+
+def test_prompt_maps_zone_names_and_asks_for_local_times() -> None:
+    """Eval Nov 10: "Mountain time" requests came back with Central offsets."""
+    system = draft([GOOD])[1].calls[0][0]
+    assert "Mountain = America/Denver" in system and "Pacific = America/Los_Angeles" in system
+    assert "no UTC offset" in system
+
+
+@pytest.mark.parametrize(
+    "words, zone, offset",
+    [("Mountain time", "America/Denver", "-07:00"), ("Pacific", "America/Los_Angeles", "-08:00"), ("ET", None, "-06:00")],
+)
+def test_zone_named_in_the_request_wins(words, zone, offset) -> None:
+    """Eval Nov 10: the model kept America/Chicago for "Mountain time". The request text decides."""
+    reply = {**GOOD, "timezone": "America/Chicago", "start_at": "2026-11-09T09:00", "expires_at": "2026-11-10T17:00:00-06:00"}
+    result, _ = draft([reply], text=f"Give sam@freelance.test editing Monday 9am to Tuesday 5pm {words}")
+    assert result.ok, result.errors
+    assert result.draft["timezone"] == (zone or "America/Chicago")  # unknown words leave the model's choice
+    assert result.draft["start_at"] == f"2026-11-09T09:00:00{offset}"
+    assert result.draft["expires_at"] == f"2026-11-10T17:00:00{offset}"  # wall-clock time kept, offset fixed
+
+
+def test_named_zone_keeps_times_that_are_already_unambiguous() -> None:
+    """UTC instants, or times already in the named zone, are correct and must not be rewritten."""
+    reply = {**GOOD, "timezone": "America/Chicago", "start_at": "2026-11-09T16:00:00Z", "expires_at": "2026-11-10T17:00:00-07:00"}
+    result, _ = draft([reply], text="Give sam@freelance.test editing Monday 9am to Tuesday 5pm Mountain time")
+    assert result.ok, result.errors
+    assert result.draft["start_at"] == "2026-11-09T16:00:00+00:00"
+    assert result.draft["expires_at"] == "2026-11-10T17:00:00-07:00"
+
+
+def test_local_times_take_the_named_zone_offset() -> None:
+    result, _ = draft([{**GOOD, "timezone": "America/Denver", "start_at": "2026-11-09T09:00", "expires_at": "2026-11-10T17:00"}])
+    assert result.ok, result.errors
+    assert result.draft["start_at"] == "2026-11-09T09:00:00-07:00"
+    assert result.draft["expires_at"] == "2026-11-10T17:00:00-07:00"
+
+
+def test_prompt_rules_for_durations_and_missing_end() -> None:
+    system = draft([GOOD])[1].calls[0][0]
+    assert "Use null only when" in system  # never invent an end date, never drop a given one
+    assert "same time of day" in system  # "for 3 days from 9am" ends at 9am
+    assert "same day" in system  # "Nov 10 from 9am to 5pm" ends on Nov 10
+    assert "do not add a day" in system  # "to Friday 5pm" ends on Friday, not Saturday
+    assert "schedule_posts only when" in system  # "upload drafts" is edit_drafts alone
+
+
 @pytest.mark.parametrize(
     "reply",
     [
@@ -108,12 +164,31 @@ def test_long_and_empty_input_never_reach_the_model() -> None:
 
 
 def test_llm_error_is_reported_not_raised() -> None:
-    class Broken:
-        def complete(self, *a, **k):
-            raise LLMError("NVIDIA API returned HTTP 503")
-
-    result = AccessAssistant(Broken()).draft_invitation("give sam view access", NOW)
+    result = AccessAssistant(_Broken()).draft_invitation("give sam view access", NOW)
     assert not result.ok and "assistant unavailable" in result.errors[0]
+
+
+class _Broken:
+    def complete(self, *a, **k):
+        raise LLMError("NVIDIA API returned HTTP 404")
+
+
+@pytest.mark.parametrize(
+    "llm, model, attempts",
+    [
+        (_Broken(), None, 1),  # API error
+        (FakeLLM(["nope", "still nope"]), "fake/model", 2),  # no JSON after the retry
+        (FakeLLM([{**GOOD, "task_types": "edit_drafts"}]), "fake/model", 1),  # wrong shape
+    ],
+)
+def test_failure_paths_keep_every_field_in_place(llm, model, attempts) -> None:
+    """Issue #4: error returns skipped `warnings`, so model, attempts and latency landed one field over."""
+    result = AccessAssistant(llm).draft_invitation("give sam view access", NOW)
+    assert not result.ok and result.draft is None and result.errors
+    assert result.warnings == []
+    assert result.model == model
+    assert result.attempts == attempts
+    assert isinstance(result.latency_ms, int) and result.latency_ms >= 0
 
 
 def test_extract_json_rejects_non_objects() -> None:
@@ -219,3 +294,32 @@ def test_nvidia_client_gives_up_after_retries() -> None:
 def test_nvidia_client_requires_key() -> None:
     with pytest.raises(ValueError):
         NvidiaClient("", "m")
+
+
+def _payloads(**client_kwargs) -> list[dict]:
+    sent: list[dict] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        sent.append(__import__("json").loads(request.content))
+        return nvidia_reply("{}")
+
+    NvidiaClient("k", "m", transport=httpx.MockTransport(handler), sleep=lambda s: None, **client_kwargs).complete("s", "u")
+    return sent
+
+
+def test_nvidia_client_turns_reasoning_off_by_default() -> None:
+    """Issue #4: reasoning models spent all of max_tokens thinking and returned empty content."""
+    assert _payloads()[0]["chat_template_kwargs"] == {"enable_thinking": False}
+
+
+def test_nvidia_client_can_leave_reasoning_on() -> None:
+    assert "chat_template_kwargs" not in _payloads(disable_thinking=False)[0]
+
+
+def test_reasoning_setting_comes_from_env(monkeypatch) -> None:
+    from app.config import Settings
+
+    monkeypatch.delenv("NVIDIA_DISABLE_THINKING", raising=False)
+    assert Settings.from_env().nvidia_disable_thinking is True
+    monkeypatch.setenv("NVIDIA_DISABLE_THINKING", "false")
+    assert Settings.from_env().nvidia_disable_thinking is False
