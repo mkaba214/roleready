@@ -13,7 +13,7 @@ import pytest
 
 from scripts.iam import Cloud, CloudError, apply_plan, load_spec, make_plan
 
-TEAM = {"mohamed": "m@example.test", "andrew": "a@example.test", "ashley": "s@example.test", "joclyn": "j@example.test"}
+TEAM = {"mohamed": "m@example.test", "andrew": "a@example.test", "joclyn": "j@example.test"}
 
 
 class FakeResponse:
@@ -91,7 +91,7 @@ def test_floci_apply_then_plan_is_empty(spec) -> None:
     fake = FakeGoogle()
     plan = make_plan(floci(fake), spec, {})
     assert set(plan.create_sas) == {"roleready-run", "roleready-scheduler", "roleready-export",
-                                    "person-mohamed", "person-andrew", "person-ashley", "person-joclyn"}
+                                    "person-mohamed", "person-andrew", "person-joclyn"}
     assert set(plan.missing_secrets) == {"nvidia-api-key", "roleready-integration-key"}
     apply_plan(floci(fake), spec, plan)
     again = make_plan(floci(fake), spec, {})

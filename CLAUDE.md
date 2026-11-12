@@ -1,6 +1,6 @@
 # RoleReady: instructions for Claude Code
 
-RoleReady gives a small business owner time-boxed, least-privilege access control for freelancers, with an NVIDIA-powered Access Assistant and a tamper-evident audit log. GCLP BUILD capstone, team of four, final PR due Nov 28, 2026 11:59 PM ET. Product brief: `docs/product-brief.md`. Open decisions: `docs/decisions.md`.
+RoleReady gives a small business owner time-boxed, least-privilege access control for freelancers, with an NVIDIA-powered Access Assistant and a tamper-evident audit log. GCLP BUILD capstone, team of three, final PR due Nov 28, 2026 11:59 PM ET. Product brief: `docs/product-brief.md`. Open decisions: `docs/decisions.md`.
 
 ## Commands
 
@@ -31,4 +31,4 @@ RoleReady gives a small business owner time-boxed, least-privilege access contro
 
 ## Team owners
 
-Mohamed (@mkaba214): cloud engineering, deploy, CI. Andrew (@dmandrew01): permission rules, Access Assistant, IAM. Ashley (@Aphillipstech): Firebase Auth, invite tokens, revoke, expiry job, threat model. Joclyn (@JDenise25): research, metrics, BigQuery + Looker Studio, evals, written docs. Reviewers per path: `.github/CODEOWNERS`.
+Mohamed (@mkaba214): cloud engineering, deploy, CI. Andrew (@dmandrew01): permission rules, Access Assistant, IAM, Firebase Auth, invite tokens, revoke, expiry job, threat model. Joclyn (@JDenise25): research, metrics, BigQuery + Looker Studio, evals, written docs. Reviewers per path: `.github/CODEOWNERS`.

@@ -5,13 +5,13 @@
 #   bash scripts/github_setup.sh --dry-run     # print every step, change nothing
 #   bash scripts/github_setup.sh
 #
-# Team GitHub usernames (built in): Mohamed mkaba214 · Andrew dmandrew01 · Ashley Aphillipstech · Joclyn JDenise25
-# Options: --mohamed/--andrew/--ashley/--joclyn USERNAME (override one) · --name roleready (repo name)
+# Team GitHub usernames (built in): Mohamed mkaba214 · Andrew dmandrew01 · Joclyn JDenise25
+# Options: --mohamed/--andrew/--joclyn USERNAME (override one) · --name roleready (repo name)
 #          · --private (new repos only) · --dry-run
 #
 # What it does
 #   1. Refuses to continue if a secret or local-only file (.env, team.local.yaml, Floci data/) would be committed.
-#   2. Fills any CODEOWNERS placeholders with the four usernames and commits.
+#   2. Fills any CODEOWNERS placeholders with the team usernames and commits.
 #   3. Pushes main to OWNER/roleready (uses the existing empty repo, or creates it if missing).
 #   4. Squash merges only; branches auto-delete after merge.
 #   5. Dependabot alerts and fixes; secret scanning with push protection (public repos).
@@ -23,13 +23,12 @@ set -euo pipefail
 REPO_NAME="roleready"
 VISIBILITY="public"
 DRY_RUN=0
-MOHAMED="mkaba214" ANDREW="dmandrew01" ASHLEY="Aphillipstech" JOCLYN="JDenise25"
+MOHAMED="mkaba214" ANDREW="dmandrew01" JOCLYN="JDenise25"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --mohamed) MOHAMED="$2"; shift 2 ;;
     --andrew)  ANDREW="$2";  shift 2 ;;
-    --ashley)  ASHLEY="$2";  shift 2 ;;
     --joclyn)  JOCLYN="$2";  shift 2 ;;
     --name)    REPO_NAME="$2"; shift 2 ;;
     --private) VISIBILITY="private"; shift ;;
@@ -47,8 +46,8 @@ warn() { echo "  ! $*" >&2; }
 
 cd "$(dirname "$0")/.."
 [[ -f CLAUDE.md && -d app ]] || { echo "Run this from the RoleReady project folder."; exit 1; }
-for u in "$MOHAMED" "$ANDREW" "$ASHLEY" "$JOCLYN"; do
-  [[ -n "$u" ]] || { echo "Every teammate needs a GitHub username (--mohamed, --andrew, --ashley, --joclyn)."; exit 2; }
+for u in "$MOHAMED" "$ANDREW" "$JOCLYN"; do
+  [[ -n "$u" ]] || { echo "Every teammate needs a GitHub username (--mohamed, --andrew, --joclyn)."; exit 2; }
   [[ "$u" =~ ^[A-Za-z0-9-]+$ ]] || { echo "Not a GitHub username: $u"; exit 2; }
 done
 
@@ -63,8 +62,8 @@ REPO="${OWNER}/${REPO_NAME}"
 echo "  signed in as: ${OWNER}   repo: ${REPO}"
 shopt -s nocasematch
 case "$OWNER" in
-  "$MOHAMED"|"$ANDREW"|"$ASHLEY"|"$JOCLYN") ;;
-  *) warn "${OWNER} is not one of the four usernames you passed; the repo will live under ${OWNER}" ;;
+  "$MOHAMED"|"$ANDREW"|"$JOCLYN") ;;
+  *) warn "${OWNER} is not one of the team usernames you passed; the repo will live under ${OWNER}" ;;
 esac
 shopt -u nocasematch
 
@@ -81,7 +80,7 @@ fi
 echo "== Filling CODEOWNERS"
 if grep -q "@[A-Z]*_GITHUB" .github/CODEOWNERS; then
   run sed -i.bak -e "s/@MOHAMED_GITHUB/@${MOHAMED}/g" -e "s/@ANDREW_GITHUB/@${ANDREW}/g" \
-    -e "s/@ASHLEY_GITHUB/@${ASHLEY}/g" -e "s/@JOCLYN_GITHUB/@${JOCLYN}/g" .github/CODEOWNERS
+    -e "s/@JOCLYN_GITHUB/@${JOCLYN}/g" .github/CODEOWNERS
   run rm -f .github/CODEOWNERS.bak
 fi
 
@@ -136,7 +135,7 @@ run gh api -X PATCH "repos/${REPO}" \
 
 echo "== Inviting collaborators"
 shopt -s nocasematch
-for u in "$MOHAMED" "$ANDREW" "$ASHLEY" "$JOCLYN"; do
+for u in "$MOHAMED" "$ANDREW" "$JOCLYN"; do
   if [[ "$u" == "$OWNER" ]]; then continue; fi
   run gh api -X PUT "repos/${REPO}/collaborators/${u}" >/dev/null || warn "could not invite ${u}"
 done
