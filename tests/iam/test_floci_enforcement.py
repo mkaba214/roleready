@@ -102,16 +102,20 @@ def test_nobody_can_create_service_account_keys(cloud, name) -> None:
 
 def test_time_boxed_grant_stops_working_after_it_expires(cloud) -> None:
     """The same rule RoleReady enforces for freelancers, applied to cloud access."""
-    cloud.create_sa("person-contractor", "Former contractor (test)")
+    # read_key() adds the "person-" prefix through who(), so pass the short name "contractor".
+    # Floci mints tokens even for accounts that don't exist, so check the account first;
+    # otherwise the 403 below would pass for the wrong reason.
+    cloud.create_sa(who("contractor"), "Former contractor (test)")
+    assert cloud.sa_exists(who("contractor"))
     policy = cloud.get_policy("secret", "nvidia-api-key")
-    member = f"serviceAccount:{cloud.sa_email('person-contractor')}"
+    member = f"serviceAccount:{cloud.sa_email(who('contractor'))}"
     policy["version"] = 3
     policy.setdefault("bindings", []).append({
         "role": "roles/secretmanager.secretAccessor", "members": [member],
         "condition": {"title": "ended", "expression": "request.time < timestamp('2026-10-31T00:00:00Z')"},
     })
     cloud.set_policy("secret", "nvidia-api-key", policy)
-    assert read_key(cloud, "person-contractor") == 403
+    assert read_key(cloud, "contractor") == 403
 
     policy = cloud.get_policy("secret", "nvidia-api-key")
     policy["bindings"].append({
@@ -119,4 +123,4 @@ def test_time_boxed_grant_stops_working_after_it_expires(cloud) -> None:
         "condition": {"title": "current", "expression": "request.time < timestamp('2030-01-01T00:00:00Z')"},
     })
     cloud.set_policy("secret", "nvidia-api-key", policy)
-    assert read_key(cloud, "person-contractor") == 200
+    assert read_key(cloud, "contractor") == 200
