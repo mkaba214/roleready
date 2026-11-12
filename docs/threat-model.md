@@ -1,4 +1,4 @@
-# Threat model (STRIDE). Owner: Ashley. Reviewer: Andrew.
+# Threat model (STRIDE). Owner: Andrew (from Ashley, Nov 10). Reviewer: Mohamed.
 
 Scope: invite, approve, accept, act, revoke, expire, and the Access Assistant.
 Each row names the test that proves the control. Add rows as you find new threats.
