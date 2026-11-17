@@ -65,8 +65,19 @@ Run: `python -m evals.run_eval --set regression`. Cases live in `evals/regressio
 
 | Date | Code | Model | Passed | r01 | r02 | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| Nov 17, 2026 | Before fix (#15 not merged) | nvidia/nemotron-3.5-lightning-30b-a3b | 0/2 | FAIL | FAIL | r01 switched to Los Angeles time, so 10am-2pm landed 2 hours late. r02 switched to Denver time (1 hour late) and also ended Thursday instead of Wednesday, the known weekday-range weakness from e01/e14, so r02 may still fail after the fix. |
+| Nov 17, 2026 | Before fix (#15 not merged) | nvidia/nemotron-3.5-lightning-30b-a3b | 0/2 | FAIL | FAIL | See cause analysis below |
 | _pending_ | After fix (#15 merged) | nvidia/nemotron-3.5-lightning-30b-a3b | | | | Fill in after #15 merges |
+
+**Cause analysis, Nov 17 before-fix run.** Model times compared with expected times, both shown in Chicago time:
+
+| Case | Field | Expected | Model's draft | Off by | Cause |
+| --- | --- | --- | --- | --- | --- |
+| r01 | start_at | Mon Nov 9, 10:00 AM | Mon Nov 9, 12:00 PM (`10:00-08:00`) | +2 h | #13 only: right day and clock time, read as Los Angeles time |
+| r01 | expires_at | Mon Nov 9, 2:00 PM | Mon Nov 9, 4:00 PM (`14:00-08:00`) | +2 h | #13 only |
+| r02 | start_at | Mon Nov 9, 9:00 AM | Mon Nov 9, 10:00 AM (`09:00-07:00`) | +1 h | #13 only: read as Denver time |
+| r02 | expires_at | Wed Nov 11, 5:00 PM | Thu Nov 12, 6:00 PM (`2026-11-12T17:00-07:00`) | +25 h | Two causes: +1 h from #13 (Denver), plus +24 h because the model picked Thursday for "Wednesday", the known weekday-range issue (e01/e14) |
+
+Three of the four time errors are only the #13 bug, which #15 fixes. The extra day in r02's end time comes from the model's date choice, not the zone code, so r02 is likely to still fail after #15, off by 24 hours instead of 25.
 
 ## Live reliability checks (Week 3)
 
