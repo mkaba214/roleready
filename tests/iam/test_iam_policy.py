@@ -32,6 +32,12 @@ def test_only_the_run_service_reads_secrets(spec) -> None:
     assert readers == {"sa:roleready-run"}
 
 
+def test_only_andrew_administers_firebase_auth(spec) -> None:
+    # Decided in issue #10 (D7): Ashley's auth areas moved to Andrew, so he alone holds this role.
+    admins = {b.member for b in expand(spec) if b.role == "roles/firebaseauth.admin"}
+    assert admins == {"person:andrew"}
+
+
 def test_scheduler_has_no_project_roles(spec) -> None:
     assert not [b for b in expand(spec) if b.member == "sa:roleready-scheduler"]
 

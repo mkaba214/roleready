@@ -36,7 +36,7 @@ team:
   mohamed:
     lead_for: Cloud engineering and integration (deploys the service)
   andrew:
-    lead_for: Permission rules, AI agent, IAM administration
+    lead_for: Permission rules, AI agent, IAM administration, Firebase Auth and access lifecycle
   joclyn:
     lead_for: Research, success metrics, analytics, agent evaluation, documentation
 
@@ -62,6 +62,7 @@ project_bindings:
       - roles/secretmanager.admin
       - roles/iam.securityReviewer
       - roles/logging.privateLogViewer
+      - roles/firebaseauth.admin             # Firebase Auth, invite sign-in (D7, issue #10)
   - member: person:joclyn
     roles:
       - roles/bigquery.user
