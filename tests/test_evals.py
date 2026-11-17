@@ -6,7 +6,7 @@ import json
 from datetime import datetime, timedelta
 
 from app.agent import AccessAssistant
-from evals.run_eval import load_cases, run
+from evals.run_eval import REGRESSION_SET, load_cases, run
 from tests.conftest import FakeLLM
 
 
@@ -54,3 +54,24 @@ def test_policy_keeps_a_reckless_model_safe() -> None:
     report = run(AccessAssistant(FakeLLM([reckless] * len(cases))), cases)
     # Policy rejects every reckless draft, so the system stays safe even with a bad model.
     assert all(r["pass"] for r in report["cases"])
+
+
+def test_regression_set_is_well_formed_and_separate() -> None:
+    """Bug-fix cases live outside the brief's 30, so "27 of 30" keeps its meaning (issue #13)."""
+    main_ids = {c["id"] for c in load_cases()}
+    cases = load_cases(REGRESSION_SET)
+    assert cases
+    ids = [c["id"] for c in cases]
+    assert len(set(ids)) == len(ids)
+    assert all(i.startswith("r") for i in ids)
+    assert not set(ids) & main_ids
+    for c in cases:
+        assert c["expect"] in {"ok", "rejected", "safe"}
+        assert c.get("issue"), "each regression case names the issue it guards"
+        datetime.fromisoformat(c["now"].replace("Z", "+00:00"))
+
+
+def test_perfect_model_scores_100_on_regression_set() -> None:
+    cases = load_cases(REGRESSION_SET)
+    report = run(AccessAssistant(FakeLLM([perfect_reply(c) for c in cases])), cases)
+    assert report["accuracy"] == 1.0, [r for r in report["cases"] if not r["pass"]]

@@ -3,6 +3,7 @@
   export NVIDIA_API_KEY=nvapi-...
   python -m evals.run_eval --model nvidia/nemotron-3.5-lightning-30b-a3b
   python -m evals.run_eval --model <second model> --limit 5
+  python -m evals.run_eval --set regression      # bug-fix cases, scored apart from the brief's 30
 
 Each case expects one of:
   ok        a valid draft whose email, role, tasks and times match
@@ -28,6 +29,8 @@ from app.config import Settings
 from app.llm import NvidiaClient
 
 HERE = Path(__file__).parent
+BRIEF_SET = HERE / "eval_set.jsonl"            # the brief's 30 cases (target 27 of 30). Keep at 30.
+REGRESSION_SET = HERE / "regression_set.jsonl"  # cases that guard fixed bugs; each names its issue
 TOLERANCE = timedelta(minutes=5)
 
 
@@ -83,7 +86,7 @@ def run(assistant: AccessAssistant, cases: list[dict[str, Any]]) -> dict[str, An
     }
 
 
-def load_cases(path: Path = HERE / "eval_set.jsonl") -> list[dict[str, Any]]:
+def load_cases(path: Path = BRIEF_SET) -> list[dict[str, Any]]:
     return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
 
 
@@ -91,6 +94,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default=os.environ.get("NVIDIA_MODEL", "nvidia/nemotron-3.5-lightning-30b-a3b"))
     parser.add_argument("--limit", type=int, default=0)
+    parser.add_argument("--set", choices=["brief", "regression"], default="brief", help="which case file to run")
     args = parser.parse_args()
 
     key = os.environ.get("NVIDIA_API_KEY", "")
@@ -103,22 +107,23 @@ def main() -> None:
         timeout=60,
         disable_thinking=Settings.from_env().nvidia_disable_thinking,
     )
-    cases = load_cases()[: args.limit or None]
+    cases = load_cases(REGRESSION_SET if args.set == "regression" else BRIEF_SET)[: args.limit or None]
     report = run(AccessAssistant(client), cases)
     report["model"] = args.model
+    report["set"] = args.set
     report["run_at"] = datetime.now().isoformat(timespec="seconds")
 
     out_dir = HERE / "results"
     out_dir.mkdir(exist_ok=True)
-    out = out_dir / f"{re.sub(r'[^A-Za-z0-9]+', '-', args.model)}-{datetime.now():%Y%m%d-%H%M}.json"
+    out = out_dir / f"{args.set}-{re.sub(r'[^A-Za-z0-9]+', '-', args.model)}-{datetime.now():%Y%m%d-%H%M}.json"
     out.write_text(json.dumps(report, indent=2, default=str))
 
-    print(f"\n| Model | Passed | Accuracy | Median latency |\n| --- | --- | --- | --- |")
-    print(f"| {args.model} | {report['passed']}/{report['total']} | {report['accuracy']:.0%} | {report['median_latency_ms']} ms |\n")
+    print(f"\n| Set | Model | Passed | Accuracy | Median latency |\n| --- | --- | --- | --- | --- |")
+    print(f"| {args.set} | {args.model} | {report['passed']}/{report['total']} | {report['accuracy']:.0%} | {report['median_latency_ms']} ms |\n")
     for row in report["cases"]:
         failed = [k for k, ok in row["checks"].items() if not ok]
         print(f"{row['id']}: {'PASS' if row['pass'] else 'FAIL ' + ', '.join(failed)}")
-    if report["total"] == 30:
+    if args.set == "brief" and report["total"] == 30:
         verdict = "MET" if report["passed"] >= 27 else "NOT MET"
         print(f"\nBrief target, at least 27 of 30 correct: {verdict} ({report['passed']}/30)")
     print(f"\nSaved {out}")
