@@ -63,9 +63,10 @@ Run: `python -m evals.run_eval --set regression`. Cases live in `evals/regressio
 | r01 | #13 | "...view access to analytics for the Pacific Coast pop-up, Monday 10am to 2pm." | Viewer, Monday 10am-2pm Chicago time (not Los Angeles) |
 | r02 | #13 | "...schedule posts for the Mountain View store launch from Monday 9am to Wednesday 5pm." | Contributor, Chicago time (not Denver) |
 
-| Date | Model | Passed | Notes |
-| --- | --- | --- | --- |
-| | | | Run after #15 merges |
+| Date | Code | Model | Passed | r01 | r02 | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| Nov 17, 2026 | Before fix (#15 not merged) | nvidia/nemotron-3.5-lightning-30b-a3b | 0/2 | FAIL | FAIL | r01 switched to Los Angeles time, so 10am-2pm landed 2 hours late. r02 switched to Denver time (1 hour late) and also ended Thursday instead of Wednesday, the known weekday-range weakness from e01/e14, so r02 may still fail after the fix. |
+| _pending_ | After fix (#15 merged) | nvidia/nemotron-3.5-lightning-30b-a3b | | | | Fill in after #15 merges |
 
 ## Live reliability checks (Week 3)
 
