@@ -67,7 +67,7 @@ Run: `python -m evals.run_eval --set regression`. Cases live in `evals/regressio
 | --- | --- | --- | --- | --- | --- | --- |
 | Nov 17, 2026 | Before fix (#15 not merged) | nvidia/nemotron-3.5-lightning-30b-a3b | 0/2 | FAIL | FAIL | First run, original r02 wording (see note) |
 | Nov 17, 2026 | Before fix (#15 not merged) | nvidia/nemotron-3.5-lightning-30b-a3b | 0/2 | FAIL | FAIL | Second run, "Monday" single-day r02 (see cause analysis) |
-| Nov 17, 2026 | Before fix (#15 not merged) | nvidia/nemotron-3.5-lightning-30b-a3b | _pending_ | | | Third run, "Nov 9" wording for both cases |
+| Nov 17, 2026 | Before fix (#15 not merged) | nvidia/nemotron-3.5-lightning-30b-a3b | 0/2 | FAIL | FAIL | Third run, "Nov 9" wording (current cases). #13 only, see cause analysis |
 | _pending_ | After fix (#15 merged) | nvidia/nemotron-3.5-lightning-30b-a3b | | | | Fill in after #15 merges |
 
 **Note on the original r02 wording (first run).** r02 first read "...from Monday 9am to Wednesday 5pm." Its end landed on Thu Nov 12, 6:00 PM Chicago time instead of Wed 5:00 PM: +1 h from #13 (Denver), plus +24 h from the known weekday-range issue (e01/e14), where the model picked Thursday for "Wednesday". Mixing two bugs meant r02 would still fail after #15, so it now uses a single-day window and tests #13 only. In the same run, r01 was off by +2 h on both times (`10:00-08:00`, `14:00-08:00`, read as Los Angeles time), which is #13 only.
@@ -82,6 +82,17 @@ Run: `python -m evals.run_eval --set regression`. Cases live in `evals/regressio
 | r02 | expires_at | Mon Nov 9, 5:00 PM | Tue Nov 10, 6:00 PM (`2026-11-10T17:00-07:00`) | +25 h | Same two causes |
 
 The single-day window removed the range-end problem, but r02 still mixes #13 with a model date error, this time a wrong weekday for the whole window. Any case that names a weekday can hit the model's known weekday weaknesses (e01, e14), so both cases now say "Nov 9" instead of "Monday".
+
+**Cause analysis, third run with current "Nov 9" wording (Nov 17, before fix).** This is the baseline for the after-fix comparison:
+
+| Case | Field | Expected | Model's draft | Off by | Cause |
+| --- | --- | --- | --- | --- | --- |
+| r01 | start_at | Mon Nov 9, 10:00 AM | Mon Nov 9, 12:00 PM (`10:00-08:00`) | +2 h | #13 only (read as Los Angeles time) |
+| r01 | expires_at | Mon Nov 9, 2:00 PM | Mon Nov 9, 4:00 PM (`14:00-08:00`) | +2 h | #13 only |
+| r02 | start_at | Mon Nov 9, 9:00 AM | Mon Nov 9, 10:00 AM (`09:00-07:00`) | +1 h | #13 only (read as Denver time) |
+| r02 | expires_at | Mon Nov 9, 5:00 PM | Mon Nov 9, 6:00 PM (`17:00-07:00`) | +1 h | #13 only |
+
+Both cases land on the right day with the right clock times. Only the zone is wrong, so each failure is the #13 bug alone. After #15 merges, both should pass.
 
 ## Live reliability checks (Week 3)
 
