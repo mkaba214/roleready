@@ -66,14 +66,13 @@ class Client:
         return r.json()
 
 
-def invite(c: Client, email: str, role: str, tasks: list[str], start: datetime, end: datetime) -> tuple[str, str]:
+def invite(c: Client, email: str, role: str, tasks: list[str], start: datetime, end: datetime) -> str:
+    """Owner creates and approves an invitation. Returns the single-use link token, not yet accepted."""
     inv = c.ok(OWNER, "POST", "/invitations", {
         "invitee_email": email, "role": role, "task_types": tasks, "timezone": "America/Chicago",
         "start_at": start.isoformat(), "expires_at": end.isoformat(), "reason": "sample dashboard data",
     })
-    token = c.ok(OWNER, "POST", f"/invitations/{inv['id']}/approve")["invite_token"]
-    grant = c.ok(email, "POST", "/invitations/accept", {"token": token})
-    return grant["id"], token
+    return c.ok(OWNER, "POST", f"/invitations/{inv['id']}/approve")["invite_token"]
 
 
 def main() -> None:
@@ -95,13 +94,18 @@ def main() -> None:
     for email, role, tasks, start_min, window_min, _ in FREELANCERS:
         start = now + timedelta(minutes=start_min)
         end = start + timedelta(minutes=window_min)
-        grants[email], tokens[email] = invite(c, email, role, tasks, start, end)
+        tokens[email] = invite(c, email, role, tasks, start, end)
+        if email == "riley@client.test":
+            # A stranger tries Riley's link before Riley uses it: refused and logged as wrong_user.
+            # The refusal doesn't use up the link, so Riley can still accept it next.
+            r = c.call("mallory@evil.test", "POST", "/invitations/accept", {"token": tokens[email]})
+            assert r.status_code == 403, f"expected Mallory to be refused, got HTTP {r.status_code}"
+        grants[email] = c.ok(email, "POST", "/invitations/accept", {"token": tokens[email]})["id"]
         ends[email] = end
         print(f"invited {email:<24} {role:<12} until {end:%H:%M:%S} UTC")
 
-    # A reused link and a stranger using someone else's link are both refused and logged.
+    # Reusing a link that was already accepted is refused and logged as token_reused.
     c.call("sam@freelance.test", "POST", "/invitations/accept", {"token": tokens["sam@freelance.test"]})
-    c.call("mallory@evil.test", "POST", "/invitations/accept", {"token": tokens["riley@client.test"]})
 
     # 2. Rounds of work. The expiry job runs every 4th round, like the one-minute Cloud Scheduler job.
     last_end = max(ends.values())
@@ -127,9 +131,18 @@ def main() -> None:
     for _ in range(10):
         c.ok(OWNER, "POST", "/dev/run-expiry")
 
-    # 4. Everyone tries once more after their access ended. All of these must be denied.
-    for email, _, tasks, _, _, _ in FREELANCERS:
-        c.call(email, "POST", f"/actions/{tasks[0]}")
+    # 4. Everyone tries once more after their access ended. All of these must be denied,
+    #    because the access expired or the owner revoked it. Stop if any gets through.
+    problems = []
+    for email, _, tasks, _, _, revoke_after in FREELANCERS:
+        r = c.call(email, "POST", f"/actions/{tasks[0]}")
+        reason = r.json().get("reason")
+        expected = "revoked" if revoke_after else "expired"
+        if r.status_code != 403 or r.json().get("allowed") or reason != expected:
+            problems.append(f"{email}: HTTP {r.status_code}, reason {reason!r}, expected denied/{expected}")
+    if problems:
+        raise SystemExit("Post-expiry check FAILED:\n  " + "\n  ".join(problems))
+    print(f"post-expiry check: all {len(FREELANCERS)} attempts denied (expired or revoked)")
 
     # 5. Save the audit log in the BigQuery table's columns.
     events = c.ok(OWNER, "GET", "/audit")
