@@ -56,28 +56,20 @@ Live check, Nov 10, with the app on the same build. `/agent/explain-audit` gave 
 
 ## Regression set (bug-fix cases, scored apart from the brief's 30)
 
-Run: `python -m evals.run_eval --set regression`. Cases live in `evals/regression_set.jsonl`, and each one names the issue it guards. They don't count toward the brief's 27-of-30 target, so that score still compares with earlier runs.
+Run: `python -m evals.run_eval --set regression`. Cases live in `evals/regression_set.jsonl`, and each one names the issue it guards. They don't count toward the brief's 27-of-30 target, so that score still compares with earlier runs. Each case tests one bug only.
 
 | Case | Issue | Request | Correct draft |
 | --- | --- | --- | --- |
-| r01 | #13 | "...view access to analytics for the Pacific Coast pop-up, Monday 10am to 2pm." | Viewer, Monday 10am-2pm Chicago time (not Los Angeles) |
-| r02 | #13 | "...schedule posts for the Mountain View store launch from Monday 9am to Wednesday 5pm." | Contributor, Chicago time (not Denver) |
+| r01 | #13 | "...view access to analytics for the Pacific Coast pop-up, Monday 10am to 2pm." | Viewer, Mon Nov 9, 10am-2pm Chicago time (not Los Angeles) |
+| r02 | #13 | "...schedule posts for the Mountain View store launch, Monday 9am to 5pm." | Contributor, Mon Nov 9, 9am-5pm Chicago time (not Denver) |
 
 | Date | Code | Model | Passed | r01 | r02 | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| Nov 17, 2026 | Before fix (#15 not merged) | nvidia/nemotron-3.5-lightning-30b-a3b | 0/2 | FAIL | FAIL | See cause analysis below |
+| Nov 17, 2026 | Before fix (#15 not merged) | nvidia/nemotron-3.5-lightning-30b-a3b | 0/2 | FAIL | FAIL | First run, original r02 wording (see note) |
+| Nov 17, 2026 | Before fix (#15 not merged) | nvidia/nemotron-3.5-lightning-30b-a3b | _pending_ | | | Rerun with single-day r02 |
 | _pending_ | After fix (#15 merged) | nvidia/nemotron-3.5-lightning-30b-a3b | | | | Fill in after #15 merges |
 
-**Cause analysis, Nov 17 before-fix run.** Model times compared with expected times, both shown in Chicago time:
-
-| Case | Field | Expected | Model's draft | Off by | Cause |
-| --- | --- | --- | --- | --- | --- |
-| r01 | start_at | Mon Nov 9, 10:00 AM | Mon Nov 9, 12:00 PM (`10:00-08:00`) | +2 h | #13 only: right day and clock time, read as Los Angeles time |
-| r01 | expires_at | Mon Nov 9, 2:00 PM | Mon Nov 9, 4:00 PM (`14:00-08:00`) | +2 h | #13 only |
-| r02 | start_at | Mon Nov 9, 9:00 AM | Mon Nov 9, 10:00 AM (`09:00-07:00`) | +1 h | #13 only: read as Denver time |
-| r02 | expires_at | Wed Nov 11, 5:00 PM | Thu Nov 12, 6:00 PM (`2026-11-12T17:00-07:00`) | +25 h | Two causes: +1 h from #13 (Denver), plus +24 h because the model picked Thursday for "Wednesday", the known weekday-range issue (e01/e14) |
-
-Three of the four time errors are only the #13 bug, which #15 fixes. The extra day in r02's end time comes from the model's date choice, not the zone code, so r02 is likely to still fail after #15, off by 24 hours instead of 25.
+**Note on the original r02 wording (first run).** r02 first read "...from Monday 9am to Wednesday 5pm." Its end landed on Thu Nov 12, 6:00 PM Chicago time instead of Wed 5:00 PM: +1 h from #13 (Denver), plus +24 h from the known weekday-range issue (e01/e14), where the model picked Thursday for "Wednesday". Mixing two bugs meant r02 would still fail after #15, so it now uses a single-day window and tests #13 only. In the same run, r01 was off by +2 h on both times (`10:00-08:00`, `14:00-08:00`, read as Los Angeles time), which is #13 only.
 
 ## Live reliability checks (Week 3)
 
