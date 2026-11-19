@@ -32,7 +32,7 @@ def valid_timezone(name: str) -> str:
         raise ValueError("time zone is required")
     try:
         ZoneInfo(name)
-    except (ZoneInfoNotFoundError, ValueError):
+    except (ZoneInfoNotFoundError, ValueError, OSError):  # OSError: a tz folder like "America" (#19)
         raise ValueError(f"unknown time zone {name!r} (use an IANA name like America/Chicago)") from None
     return name
 
