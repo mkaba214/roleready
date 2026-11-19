@@ -59,5 +59,5 @@ The integration is off unless `INTEGRATION_API_KEY` is set, and the MVP doesn't 
 - [ ] S5: reject Firebase ID tokens whose `email_verified` is false (test first in `tests/test_api.py`). Before turning it on, account setup must mark emails verified: Firebase console users, `scripts/floci_seed.py`, and a verify-email step for freelancers who sign up themselves. Until then, create freelancer accounts before sending the invite link, so nobody can claim the email first.
 - [ ] Rate-limit failed accept attempts per IP (Cloud Armor or an in-app counter).
 - [ ] Decide audit retention (how long to keep events) and write it in the README.
-- [ ] Consent text for the 5 user-testing sessions.
+- [x] Consent text for the 5 user-testing sessions: not needed. Outside people don't use the app hands-on (D8); survey respondents see only screenshots.
 - [x] Incident steps if the NVIDIA key leaks: [docs/incident-nvidia-key.md](incident-nvidia-key.md) (revoke first, new secret version, new revision, disable the old version, check the Secret Manager read logs).
