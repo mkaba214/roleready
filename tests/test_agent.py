@@ -175,6 +175,17 @@ def test_policy_rejects_bad_model_output(patch, message) -> None:
     assert any(message in e for e in result.errors), result.errors
 
 
+@pytest.mark.parametrize("zone", ["Pacific", "America", "Etc"])
+def test_zone_folder_name_from_the_model_falls_back(zone) -> None:
+    """Issue #19: the model answered "Pacific" (a tz folder, not a zone) and the draft crashed.
+    It must fall back to the workspace zone like any other unknown name."""
+    reply = {**GOOD, "timezone": zone, "start_at": "2026-11-09T09:00", "expires_at": "2026-11-13T17:00"}
+    result, _ = draft([reply])
+    assert result.ok, result.errors
+    assert result.draft["timezone"] == "America/Chicago"
+    assert result.draft["start_at"] == "2026-11-09T09:00:00-06:00"
+
+
 def test_naive_times_get_the_owner_timezone() -> None:
     result, _ = draft([{**GOOD, "start_at": "2026-11-09T09:00:00", "expires_at": "2026-11-13T17:00:00"}])
     assert result.ok
