@@ -51,6 +51,14 @@ def test_bad_time_zone_rejected(client, tz) -> None:
     assert r.status_code == 422
 
 
+@pytest.mark.parametrize("tz", ["America", "Pacific", "Etc", "US"])
+def test_time_zone_folder_name_rejected(client, tz) -> None:
+    """Issue #19: these are folders in the tz database, not zones. They must be a 422, not a 500."""
+    r = client.post("/invitations", json=body(timezone=tz), headers=as_user(OWNER))
+    assert r.status_code == 422
+    assert "unknown time zone" in r.text
+
+
 # Focused dashboard ------------------------------------------------------------
 def test_metrics_report_success_measures(client, clock) -> None:
     grant = invite_and_accept(client)
