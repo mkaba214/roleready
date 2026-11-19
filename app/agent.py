@@ -146,7 +146,7 @@ def _zone(name: str | None, fallback: str) -> ZoneInfo:
             continue
         try:
             return ZoneInfo(candidate)
-        except (ZoneInfoNotFoundError, ValueError):
+        except (ZoneInfoNotFoundError, ValueError, OSError):  # OSError: a tz folder like "Pacific" (#19)
             continue
     return ZoneInfo("UTC")
 
