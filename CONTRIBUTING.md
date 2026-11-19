@@ -80,7 +80,7 @@ So push and pull work exactly the same with or without Floci running. If you nee
 
 ## Never commit
 
-`.env`, `.env.floci`, `infra/iam/team.local.yaml`, Floci `data/`, service-account keys, NVIDIA keys, tokens, or anyone's personal email. If you do by accident: tell Andrew (@dmandrew01, security) and Mohamed (@mkaba214) right away, rotate the secret, and do not try to hide it with a force push (main blocks it anyway).
+`.env`, `.env.floci`, `infra/iam/team.local.yaml`, Floci `data/`, service-account keys, NVIDIA keys, tokens, or anyone's personal email. If you do by accident: tell Andrew (@dmandrew01, security) and Mohamed (@mkaba214) right away, rotate the secret (for the NVIDIA key: [docs/incident-nvidia-key.md](docs/incident-nvidia-key.md)), and do not try to hide it with a force push (main blocks it anyway).
 
 ## Final submission
 
