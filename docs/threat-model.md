@@ -44,7 +44,7 @@ The integration is off unless `INTEGRATION_API_KEY` is set, and the MVP doesn't 
 | --- | --- | --- | --- | --- |
 | S5 | Spoofing | Mallory creates a Firebase email/password account for sam@freelance.test (or the owner's email) before the real person does, using the public web API key | **Open.** The server doesn't check the token's `email_verified` claim yet. See open items | None yet |
 | S6 | Spoofing | Someone calls the demo-only expiry route in production | `/dev/run-expiry` exists only in demo mode; demo mode refuses to start on Cloud Run unless `ALLOW_DEMO_AUTH_ON_CLOUD_RUN=true` (hackathon fallback only) | `test_dev_expiry_route_only_in_demo` |
-| S7 | Spoofing | Someone guesses an invite link | 256-bit random token (`secrets.token_urlsafe(32)`), looked up by SHA-256 hash; unknown tokens get 404 and an `invalid_token` audit row; rate-limiting failed tries is an open item | `test_forged_and_expired_tokens` |
+| S7 | Spoofing | Someone guesses an invite link | 256-bit random token (`secrets.token_urlsafe(32)`), looked up by SHA-256 hash; unknown tokens get 404 and an `invalid_token` audit row; after 5 failed tries in 15 minutes the signed-in user gets 429 with `Retry-After` (even for a good link), and one `too_many_attempts` audit row is written | `test_forged_and_expired_tokens`, `test_five_failures_lock_out_that_user_only`, `test_lockout_is_audited_once` |
 | D3 | Denial of service | A stranger tries Sam's link first to use it up | A refused accept (`wrong_user`) leaves the invitation approved, so Sam can still accept | `test_wrong_person_cannot_use_token` |
 | E9 | Elevation | A freelancer approves an invitation (their own or a friend's) | Approve is owner-only; the link token is created only at approval, and a refused try leaves the draft unchanged | `test_freelancer_cannot_approve_or_revoke` |
 | E10 | Elevation | A freelancer revokes someone's access, or a revoked grant comes back | Revoke is owner-only; grants move only from active to revoked or expired, and no route reverses that | `test_freelancer_cannot_approve_or_revoke`, `test_double_revoke_conflicts_and_logs_once` |
@@ -57,7 +57,7 @@ The integration is off unless `INTEGRATION_API_KEY` is set, and the MVP doesn't 
 ## Open items
 
 - [ ] S5: reject Firebase ID tokens whose `email_verified` is false (test first in `tests/test_api.py`). Before turning it on, account setup must mark emails verified: Firebase console users, `scripts/floci_seed.py`, and a verify-email step for freelancers who sign up themselves. Until then, create freelancer accounts before sending the invite link, so nobody can claim the email first.
-- [ ] Rate-limit failed accept attempts per IP (Cloud Armor or an in-app counter).
+- [x] Rate-limit failed accept attempts: in-app, per signed-in user rather than per IP (accept requires sign-in, and a client can put any address in `X-Forwarded-For`). A stranger's failures count against the stranger, never against Sam, so D3 still holds. The count is in memory per Cloud Run instance (max 3), which is fine for defense in depth on 256-bit tokens. Settings: `ACCEPT_MAX_FAILURES` (5), `ACCEPT_LOCKOUT_MINUTES` (15).
 - [ ] Decide audit retention (how long to keep events) and write it in the README.
 - [ ] Consent text for the 5 user-testing sessions.
 - [ ] Incident steps if the NVIDIA key leaks: revoke at build.nvidia.com, add a new Secret Manager version, redeploy.
