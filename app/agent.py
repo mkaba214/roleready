@@ -51,6 +51,17 @@ _ZONE_WORD_RE = re.compile(
     r"|\b(eastern|central|mountain|pacific)\s+(?:time|standard|daylight)\b",
     re.I,
 )
+# Short names a request may use. They only back up the model's own zone choice (issue #29).
+_ZONE_ABBREVIATIONS = {
+    "America/New_York": ("EST", "EDT", "ET"),
+    "America/Chicago": ("CST", "CDT", "CT"),
+    "America/Denver": ("MST", "MDT", "MT"),
+    "America/Los_Angeles": ("PST", "PDT", "PT"),
+    "UTC": ("UTC", "GMT"),
+    "Etc/UTC": ("UTC", "GMT"),
+    "GMT": ("UTC", "GMT"),
+    "Etc/GMT": ("UTC", "GMT"),
+}
 
 DRAFT_SYSTEM = """You are the RoleReady Access Assistant. Turn the owner's request into ONE invitation draft.
 Current time: {now_local} in {tz} (UTC {now_utc}).
@@ -156,7 +167,7 @@ def _parse_dt(
 ) -> datetime | None:
     """Parse a model time. Naive times are read in `tz`.
 
-    With wall_clock (the request named `tz` in words), a time carrying some other local offset is
+    With wall_clock (the request named `tz` in words, or the model's zone was dropped), a time carrying some other local offset is
     the model writing the right clock time in the wrong zone, so its offset is replaced by `tz`.
     UTC instants and times already in `tz` are unambiguous and kept as given.
     """
@@ -248,9 +259,15 @@ class AccessAssistant:
         elif not EMAIL_RE.match(email):
             errors.append(f"invitee email looks invalid: {email!r}")
         named = _zone_named_in(text)  # a zone the owner spelled out beats the model's guess
-        draft_tz = ZoneInfo(named) if named else _zone(loose.timezone, tz.key)
-        start = _parse_dt(loose.start_at, draft_tz, "start_at", errors, wall_clock=bool(named))
-        end = _parse_dt(loose.expires_at, draft_tz, "expires_at", errors, wall_clock=bool(named))
+        guess = _zone(loose.timezone, tz.key)
+        if named:
+            draft_tz, wall_clock = ZoneInfo(named), True
+        elif guess.key == tz.key or _request_mentions_zone(text, guess.key):
+            draft_tz, wall_clock = guess, False
+        else:  # a zone the request never mentions, e.g. Los Angeles for "Pacific Coast pop-up" (#29)
+            draft_tz, wall_clock = tz, True
+        start = _parse_dt(loose.start_at, draft_tz, "start_at", errors, wall_clock=wall_clock)
+        end = _parse_dt(loose.expires_at, draft_tz, "expires_at", errors, wall_clock=wall_clock)
         role = (loose.role or "").strip().lower() or None
         tasks = [str(t).strip().lower() for t in (loose.task_types or [])]
 
@@ -314,6 +331,17 @@ def _zone_named_in(text: str) -> str | None:
     """The US zone a request names in words ("Pacific time"), if exactly one. The model sometimes ignores it."""
     found = {_ZONE_WORDS[(m.group(1) or m.group(2)).lower()] for m in _ZONE_WORD_RE.finditer(text)}
     return found.pop() if len(found) == 1 else None
+
+
+def _request_mentions_zone(text: str, zone: str) -> bool:
+    """Whether the request itself names `zone`: its IANA name ("Europe/London"), its city followed by
+    "time" ("London time", not "London store"), or an abbreviation ("PST"). Otherwise it's the model's guess."""
+    if zone.lower() in text.lower():
+        return True
+    city = zone.rsplit("/", 1)[-1].replace("_", " ")
+    if re.search(rf"\b{re.escape(city)}\s+time\b", text, re.I):
+        return True
+    return any(re.search(rf"\b{abbr}\b", text) for abbr in _ZONE_ABBREVIATIONS.get(zone, ()))
 
 
 def _ms(started: float) -> int:
