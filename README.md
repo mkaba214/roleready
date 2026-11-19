@@ -92,7 +92,10 @@ python scripts/iam.py apply --target gcp --project $PROJECT_ID   # Andrew: servi
 npx firebase-tools deploy --only firestore:rules --project $PROJECT_ID
 OWNER_EMAIL=owner@yourdomain.test FIREBASE_API_KEY=... bash infra/deploy.sh
 bash infra/scheduler.sh
+python scripts/firebase_user.py --project $PROJECT_ID add owner@yourdomain.test   # repeat per teammate and freelancer
 ```
+
+Sign-in only accepts verified emails (threat S5), so create each account with `scripts/firebase_user.py` before sending the invite link. It prints a password-setup link; send it to that same email address.
 
 Set a $10 budget alert in Billing, Budgets & alerts. IAM details: [docs/iam-runbook.md](docs/iam-runbook.md).
 

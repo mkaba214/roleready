@@ -184,6 +184,41 @@ def test_firebase_mode_rejects_missing_and_bad_tokens(app_factory) -> None:
     assert c.get("/me", headers={"Authorization": "Bearer forged"}).status_code == 401
 
 
+def _firebase_client(monkeypatch, claims: dict) -> TestClient:
+    """Firebase mode with verify_id_token replaced: the token is valid and carries `claims`."""
+    import firebase_admin.auth
+
+    import app.auth
+    from app.main import create_app
+    from app.store import MemoryStore
+
+    monkeypatch.setattr(app.auth, "_firebase_app", lambda project_id: None)
+    monkeypatch.setattr(firebase_admin.auth, "verify_id_token", lambda token, app=None: dict(claims))
+    return TestClient(create_app(Settings(auth_mode="firebase", owner_email=OWNER), store=MemoryStore()))
+
+
+def test_firebase_sign_in_with_verified_email_works(monkeypatch) -> None:
+    c = _firebase_client(monkeypatch, {"email": SAM, "uid": "u-sam", "email_verified": True})
+    r = c.get("/me", headers={"Authorization": "Bearer t"})
+    assert r.status_code == 200, r.text
+    assert r.json()["email"] == SAM
+
+
+@pytest.mark.parametrize("verified", [False, None, "true", 1])
+def test_firebase_sign_in_with_unverified_email_is_refused(monkeypatch, verified) -> None:
+    """S5: anyone can self-register sam's email with the public web API key. Only a verified email counts."""
+    claims = {"email": SAM, "uid": "u-mallory"}
+    if verified is not None:
+        claims["email_verified"] = verified
+    c = _firebase_client(monkeypatch, claims)
+    r = c.get("/me", headers={"Authorization": "Bearer t"})
+    assert r.status_code == 401
+    assert "not verified" in r.json()["detail"]
+    # and so the pre-registered account can't redeem sam's invite link either
+    r = c.post("/invitations/accept", json={"token": "x" * 43}, headers={"Authorization": "Bearer t"})
+    assert r.status_code == 401
+
+
 def test_dev_expiry_route_only_in_demo(app_factory) -> None:
     from app.main import create_app
     from app.store import MemoryStore
