@@ -69,7 +69,8 @@ Run: `python -m evals.run_eval --set regression`. Cases live in `evals/regressio
 | Nov 17, 2026 | Before fix (#15 not merged) | nvidia/nemotron-3.5-lightning-30b-a3b | 0/2 | FAIL | FAIL | First run, original r02 wording (see note) |
 | Nov 17, 2026 | Before fix (#15 not merged) | nvidia/nemotron-3.5-lightning-30b-a3b | 0/2 | FAIL | FAIL | Second run, "Monday" single-day r02 (see cause analysis) |
 | Nov 17, 2026 | Before fix (#15 not merged) | nvidia/nemotron-3.5-lightning-30b-a3b | 0/2 | FAIL | FAIL | Third run, "Nov 9" wording (current cases). #13 only, see cause analysis |
-| _pending_ | After fix (#15 merged) | nvidia/nemotron-3.5-lightning-30b-a3b | | | | Fill in after #15 merges |
+| Nov 18, 2026 | After #15, before #20 | nvidia/nemotron-3.5-lightning-30b-a3b | crashed | crash | not run | The model answered `"timezone": "Pacific"` for r01 and the app crashed. Filed as #19, fixed in #20 |
+| Nov 19, 2026 | After fix (#15 and #20 merged) | nvidia/nemotron-3.5-lightning-30b-a3b | 1/2 | FAIL | PASS | r02 fixed. r01 still +2 h, but now because the model itself picked Los Angeles (see cause analysis) |
 
 **Note on the original r02 wording (first run).** r02 first read "...from Monday 9am to Wednesday 5pm." Its end landed on Thu Nov 12, 6:00 PM Chicago time instead of Wed 5:00 PM: +1 h from #13 (Denver), plus +24 h from the known weekday-range issue (e01/e14), where the model picked Thursday for "Wednesday". Mixing two bugs meant r02 would still fail after #15, so it now uses a single-day window and tests #13 only. In the same run, r01 was off by +2 h on both times (`10:00-08:00`, `14:00-08:00`, read as Los Angeles time), which is #13 only.
 
@@ -94,6 +95,16 @@ The single-day window removed the range-end problem, but r02 still mixes #13 wit
 | r02 | expires_at | Mon Nov 9, 5:00 PM | Mon Nov 9, 6:00 PM (`17:00-07:00`) | +1 h | #13 only |
 
 Both cases land on the right day with the right clock times. Only the zone is wrong, so each failure is the #13 bug alone. After #15 merges, both should pass.
+
+**Cause analysis, after-fix run (Nov 19, #15 and #20 merged).** Shown in Chicago time:
+
+| Case | Field | Expected | Model's draft | Off by | Cause |
+| --- | --- | --- | --- | --- | --- |
+| r01 | start_at | Mon Nov 9, 10:00 AM | Mon Nov 9, 12:00 PM (`10:00-08:00`, `"timezone": "America/Los_Angeles"`) | +2 h | The model's own zone guess, not the app's |
+| r01 | expires_at | Mon Nov 9, 2:00 PM | Mon Nov 9, 4:00 PM (`14:00-08:00`) | +2 h | Same |
+| r02 | both | Mon Nov 9, 9:00 AM-5:00 PM | Same (`-06:00`, `America/Chicago`) | 0 | Pass |
+
+#15 fixed the app's part of #13: the app no longer switches zones because a name contains "Pacific" or "Mountain", and r02 now passes. r01 shows a second source of the same bug. The model reads "Pacific Coast" as a zone hint and returns a valid zone itself (`America/Los_Angeles` here, `Pacific` in the Nov 18 run that crashed). The app accepts any valid zone the model returns, so the +2 h shift survives. A possible fix is for the app to keep the workspace zone unless the owner's request names a zone next to a time, which is the same rule #15 applies to the app's own check. The owner still sees the zone and must approve, so no access is granted in the wrong window without the owner seeing it.
 
 ## Live reliability checks (Week 3)
 
