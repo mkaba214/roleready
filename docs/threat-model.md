@@ -14,7 +14,7 @@ Each row names the test that proves the control. Add rows as you find new threat
 | R1 | Repudiation | "I never tried to open analytics" | Every allow and deny is logged with actor and reason | `test_grid` (asserts the audit row) |
 | I1 | Info disclosure | Freelancer reads the audit log or grant list | Owner-only routes, enforced in the service layer | `test_freelancer_cannot_use_owner_routes` |
 | I2 | Info disclosure | Invite token leaks from logs or the DB | Token in URL fragment (not sent to servers); only SHA-256 stored | `Invitation.public()` excludes `token_hash` |
-| I3 | Info disclosure | NVIDIA key leaks | Secret Manager, `.gitignore`, gitleaks in CI, key never in error messages | `test_nvidia_client_errors_never_leak_the_key` |
+| I3 | Info disclosure | NVIDIA key leaks | Secret Manager, `.gitignore`, gitleaks in CI, key never in error messages; if it leaks anyway: [incident steps](incident-nvidia-key.md) | `test_nvidia_client_errors_never_leak_the_key` |
 | D1 | Denial of service | NVIDIA rate limit (about 40 RPM) | Retries with backoff; assistant failure never blocks manual invites | `test_nvidia_client_retries_429_then_succeeds` |
 | D2 | Denial of service | Huge prompt | 2,000-character cap before any model call | `test_long_and_empty_input_never_reach_the_model` |
 | E1 | Elevation | Contributor gains `manage_access` | Invitations cannot grant owner or `manage_access`; grants cannot exceed role | `test_bad_invitations_rejected`, `test_grant_cannot_widen_role` |
@@ -60,4 +60,4 @@ The integration is off unless `INTEGRATION_API_KEY` is set, and the MVP doesn't 
 - [x] Rate-limit failed accept attempts: in-app, per signed-in user rather than per IP (accept requires sign-in, and a client can put any address in `X-Forwarded-For`). A stranger's failures count against the stranger, never against Sam, so D3 still holds. The count is in memory per Cloud Run instance (max 3), which is fine for defense in depth on 256-bit tokens. Settings: `ACCEPT_MAX_FAILURES` (5), `ACCEPT_LOCKOUT_MINUTES` (15).
 - [ ] Decide audit retention (how long to keep events) and write it in the README.
 - [ ] Consent text for the 5 user-testing sessions.
-- [ ] Incident steps if the NVIDIA key leaks: revoke at build.nvidia.com, add a new Secret Manager version, redeploy.
+- [x] Incident steps if the NVIDIA key leaks: [docs/incident-nvidia-key.md](incident-nvidia-key.md) (revoke first, new secret version, new revision, disable the old version, check the Secret Manager read logs).

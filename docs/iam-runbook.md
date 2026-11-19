@@ -81,7 +81,7 @@ Ask Joclyn to run `gcloud secrets versions access latest --secret=nvidia-api-key
 | A deploy fails with PERMISSION_DENIED | The error names the missing permission. Add the smallest predefined role that has it, through a PR |
 | Every Tuesday | `python scripts/iam.py audit --target gcp --project $PROJECT_ID`; paste the summary in the Slack update |
 | Someone leaves early | Remove them from `iam.yaml` (apply only adds), then `gcloud projects remove-iam-policy-binding $PROJECT_ID --member=user:EMAIL --role=ROLE --all` for each role |
-| Rotate the NVIDIA key | New key at build.nvidia.com, `gcloud secrets versions add nvidia-api-key --data-file=-`, redeploy, disable the old version, revoke the old key at NVIDIA |
+| Rotate the NVIDIA key | New key at build.nvidia.com, `gcloud secrets versions add nvidia-api-key --data-file=-`, redeploy, disable the old version, revoke the old key at NVIDIA. If it leaked, revoke it first: [incident steps](incident-nvidia-key.md) |
 | Who read a secret? | Logs Explorer: `protoPayload.serviceName="secretmanager.googleapis.com" AND protoPayload.methodName:"AccessSecretVersion"` (Data Access logs are turned on by apply) |
 | Dec 1 | Teammate grants stop working on their own. Run `audit` once more and attach it to the final submission |
 
