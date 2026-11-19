@@ -43,7 +43,14 @@ _ZONE_WORDS = {
     "mountain": "America/Denver",
     "pacific": "America/Los_Angeles",
 }
-_ZONE_WORD_RE = re.compile(r"\b(eastern|central|mountain|pacific)\b", re.I)
+# A zone word counts only next to time words: "5pm Pacific", "noon Eastern", "Pacific time", "Mountain Standard".
+# Alone it is often a name ("Pacific Coast pop-up", "Central Park", "Mountain View"), not a time zone (issue #13).
+_CLOCK = r"(?:\d{1,2}(?::\d{2})?\s*(?:[ap]\.?m\.?)?|noon|midnight)"
+_ZONE_WORD_RE = re.compile(
+    rf"\b{_CLOCK}\s+(eastern|central|mountain|pacific)\b"
+    r"|\b(eastern|central|mountain|pacific)\s+(?:time|standard|daylight)\b",
+    re.I,
+)
 
 DRAFT_SYSTEM = """You are the RoleReady Access Assistant. Turn the owner's request into ONE invitation draft.
 Current time: {now_local} in {tz} (UTC {now_utc}).
@@ -139,7 +146,7 @@ def _zone(name: str | None, fallback: str) -> ZoneInfo:
             continue
         try:
             return ZoneInfo(candidate)
-        except (ZoneInfoNotFoundError, ValueError):
+        except (ZoneInfoNotFoundError, ValueError, OSError):  # OSError: a tz folder like "Pacific" (#19)
             continue
     return ZoneInfo("UTC")
 
@@ -305,7 +312,7 @@ def _calendar(now: datetime, tz: ZoneInfo, days: int = 14) -> str:
 
 def _zone_named_in(text: str) -> str | None:
     """The US zone a request names in words ("Pacific time"), if exactly one. The model sometimes ignores it."""
-    found = {_ZONE_WORDS[w.lower()] for w in _ZONE_WORD_RE.findall(text)}
+    found = {_ZONE_WORDS[(m.group(1) or m.group(2)).lower()] for m in _ZONE_WORD_RE.finditer(text)}
     return found.pop() if len(found) == 1 else None
 
 

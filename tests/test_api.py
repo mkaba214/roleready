@@ -78,6 +78,22 @@ def test_freelancer_cannot_use_owner_routes(client) -> None:
     assert client.post("/invitations", json=body, headers=h).status_code == 403
 
 
+def test_freelancer_cannot_approve_or_revoke(client) -> None:
+    """Threat model E9 and E10: approving and revoking are owner-only, and a refused try changes nothing."""
+    _, token = invite(client)
+    grant_id = client.post("/invitations/accept", json={"token": token}, headers=as_user(SAM)).json()["id"]
+    body = {"invitee_email": RILEY, "role": "viewer", "task_types": ["view_analytics"],
+            "start_at": (T0 + timedelta(hours=1)).isoformat(), "expires_at": (T0 + timedelta(days=1)).isoformat()}
+    draft_id = client.post("/invitations", json=body, headers=as_user(OWNER)).json()["id"]
+
+    assert client.post(f"/invitations/{draft_id}/approve", headers=as_user(SAM)).status_code == 403
+    assert client.post(f"/grants/{grant_id}/revoke", headers=as_user(SAM)).status_code == 403
+
+    # Still a draft and still active: the owner's own approve and revoke go through.
+    assert client.post(f"/invitations/{draft_id}/approve", headers=as_user(OWNER)).status_code == 200
+    assert client.post(f"/grants/{grant_id}/revoke", headers=as_user(OWNER)).status_code == 200
+
+
 def test_reused_token_is_410(client) -> None:
     _, token = invite(client)
     assert client.post("/invitations/accept", json={"token": token}, headers=as_user(SAM)).status_code == 200
@@ -96,6 +112,13 @@ def test_forged_and_expired_tokens(client, clock) -> None:
     assert client.post("/invitations/accept", json={"token": "x" * 43}, headers=as_user(SAM)).status_code == 404
     _, token = invite(client)
     clock.advance(hours=73)  # invite links last 72 hours
+    assert client.post("/invitations/accept", json={"token": token}, headers=as_user(SAM)).status_code == 410
+
+
+def test_invite_link_ends_with_the_access_it_grants(client, clock) -> None:
+    """Threat model E12: a link for a short window stops working when the window ends, not after 72 hours."""
+    _, token = invite(client, start_in=timedelta(minutes=10), length=timedelta(hours=1))
+    clock.advance(hours=2)
     assert client.post("/invitations/accept", json={"token": token}, headers=as_user(SAM)).status_code == 410
 
 

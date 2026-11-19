@@ -71,6 +71,41 @@ def test_zone_named_in_the_request_wins(words, zone, offset) -> None:
     assert result.draft["expires_at"] == f"2026-11-10T17:00:00{offset}"  # wall-clock time kept, offset fixed
 
 
+@pytest.mark.parametrize(
+    "text",
+    [
+        "Let sam@freelance.test edit the Central Park campaign drafts Monday 9 to Tuesday 5",
+        "Give sam@freelance.test editing for the Pacific Coast pop-up, Monday 10am to Tuesday 2pm",
+        "Give sam@freelance.test editing for the Mountain View store launch Monday 9am to Tuesday 5pm",
+    ],
+)
+def test_zone_word_in_a_name_is_not_a_time_zone(text) -> None:
+    """Issue #13: "Pacific Coast", "Central Park" or "Mountain View" must not move the window to another zone."""
+    reply = {**GOOD, "timezone": "America/Chicago", "start_at": "2026-11-09T09:00", "expires_at": "2026-11-10T17:00"}
+    result, _ = draft([reply], text=text)
+    assert result.ok, result.errors
+    assert result.draft["timezone"] == "America/Chicago"
+    assert result.draft["start_at"] == "2026-11-09T09:00:00-06:00"
+
+
+@pytest.mark.parametrize(
+    "words, zone",
+    [
+        ("9am Pacific time", "America/Los_Angeles"),
+        ("9am to 5pm Pacific", "America/Los_Angeles"),
+        ("noon Eastern", "America/New_York"),
+        ("Mountain Standard Time", "America/Denver"),
+        ("9:00 a.m. Pacific", "America/Los_Angeles"),
+    ],
+)
+def test_zone_word_next_to_a_time_still_counts(words, zone) -> None:
+    """Issue #13: a zone word right after a clock time, or before time/standard/daylight, still decides the zone."""
+    reply = {**GOOD, "timezone": "America/Chicago", "start_at": "2026-11-09T09:00", "expires_at": "2026-11-10T17:00"}
+    result, _ = draft([reply], text=f"Give sam@freelance.test editing for the Pacific Coast pop-up Monday {words}")
+    assert result.ok, result.errors
+    assert result.draft["timezone"] == zone
+
+
 def test_named_zone_keeps_times_that_are_already_unambiguous() -> None:
     """UTC instants, or times already in the named zone, are correct and must not be rewritten."""
     reply = {**GOOD, "timezone": "America/Chicago", "start_at": "2026-11-09T16:00:00Z", "expires_at": "2026-11-10T17:00:00-07:00"}
@@ -138,6 +173,17 @@ def test_policy_rejects_bad_model_output(patch, message) -> None:
     result, _ = draft([{**GOOD, **patch}])
     assert not result.ok
     assert any(message in e for e in result.errors), result.errors
+
+
+@pytest.mark.parametrize("zone", ["Pacific", "America", "Etc"])
+def test_zone_folder_name_from_the_model_falls_back(zone) -> None:
+    """Issue #19: the model answered "Pacific" (a tz folder, not a zone) and the draft crashed.
+    It must fall back to the workspace zone like any other unknown name."""
+    reply = {**GOOD, "timezone": zone, "start_at": "2026-11-09T09:00", "expires_at": "2026-11-13T17:00"}
+    result, _ = draft([reply])
+    assert result.ok, result.errors
+    assert result.draft["timezone"] == "America/Chicago"
+    assert result.draft["start_at"] == "2026-11-09T09:00:00-06:00"
 
 
 def test_naive_times_get_the_owner_timezone() -> None:
