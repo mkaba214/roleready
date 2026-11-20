@@ -59,5 +59,5 @@ The integration is off unless `INTEGRATION_API_KEY` is set, and the MVP doesn't 
 - [x] S5: Firebase ID tokens whose `email_verified` isn't true are refused (#21). Seeded and admin-created accounts are marked verified; freelancers get a password-setup link from `scripts/firebase_user.py`, not self sign-up
 - [x] Rate-limit failed accept attempts: in-app, per signed-in user rather than per IP (accept requires sign-in, and a client can put any address in `X-Forwarded-For`). A stranger's failures count against the stranger, never against Sam, so D3 still holds. The count is in memory per Cloud Run instance (max 3), which is fine for defense in depth on 256-bit tokens. Settings: `ACCEPT_MAX_FAILURES` (5), `ACCEPT_LOCKOUT_MINUTES` (15).
 - [ ] Decide audit retention (how long to keep events) and write it in the README.
-- [ ] Consent text for the 5 user-testing sessions.
+- [x] Consent text for the 5 user-testing sessions: not needed. Outside people don't use the app hands-on (D8); survey respondents see only screenshots.
 - [x] Incident steps if the NVIDIA key leaks: [docs/incident-nvidia-key.md](incident-nvidia-key.md) (revoke first, new secret version, new revision, disable the old version, check the Secret Manager read logs).

@@ -11,6 +11,7 @@ The Nov 4 brief asks the team to confirm five things (section 12). Each row show
 | D5 | Responsibilities and milestones | Leads as listed in the brief §11. Each lead owns the matching Claude Code prompt in the setup guide | Proposed | |
 | D6 | Team repository host | `github.com/mkaba214/roleready`, owned by Mohamed (@mkaba214) as Team Lead; Andrew (@dmandrew01) and Joclyn (@JDenise25) are collaborators (Ashley left on Nov 10, see D7). Public, so branch protection works on GitHub Free. `main` takes changes only through reviewed pull requests with green CI | Decided | Team, Nov 5 |
 | D7 | Ashley leaves the team | Ashley (@Aphillipstech) resigned on Nov 10. Her grants come out of `infra/iam/iam.yaml`. Her areas (Firebase Auth, invite tokens, revoke, expiry job, threat model) move to Andrew, her named backup in the BUILD plan. Mohamed replaces her as second code owner on security paths. Of her Google Cloud roles, only `roles/firebaseauth.admin` is reassigned: Andrew takes it (issue #10), Joclyn's analytics work doesn't need it (least privilege). Her other roles are not reassigned | Decided | Team, weekend meeting (issue #10) |
+| D8 | User testing | Outside people don't use the app hands-on. Instead, the user survey gets a section with three screenshot tasks from the owner's journey (invite a freelancer, see what they did, remove their access), each rated for ease (1-5), plus a usefulness rating. The usability measure in the brief §8 is updated to match | Decided | Team, Nov 15 |
 
 ## Decisions already made in the code (change with care)
 
