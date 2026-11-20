@@ -25,6 +25,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
 import subprocess
 import sys
 from dataclasses import dataclass, field
@@ -468,8 +469,11 @@ def print_plan(plan: Plan) -> None:
 
 
 def gcloud_token() -> str:
+    gcloud = shutil.which("gcloud")  # full path, so Windows finds gcloud.cmd (a bare "gcloud" gives WinError 2)
+    if not gcloud:
+        raise SystemExit("gcloud is not installed or not on PATH. Install the Google Cloud CLI, then run: gcloud auth login")
     try:
-        return subprocess.run(["gcloud", "auth", "print-access-token"], check=True, capture_output=True, text=True).stdout.strip()
+        return subprocess.run([gcloud, "auth", "print-access-token"], check=True, capture_output=True, text=True).stdout.strip()
     except (OSError, subprocess.CalledProcessError) as exc:
         raise SystemExit(f"Could not get a token from gcloud ({exc}). Run: gcloud auth login") from None
 
