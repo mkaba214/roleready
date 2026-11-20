@@ -20,7 +20,7 @@
 - No code change. The chain stays whole and `verify_chain()` keeps checking from the first event.
 - Keep Google's log defaults: 400 days for Admin Activity, 30 days for Data Access. 30 days covers the leaked-key check in `docs/incident-nvidia-key.md` for the life of the capstone. Longer retention in `_Default` costs money.
 
-**2. When the program ends: delete the project.** All teammate grants end on Dec 1 (time-boxed in `iam.yaml`). After grading, Mohamed deletes `roleready-515202`. That removes Firestore, BigQuery and the logs together. Google keeps a deleted project recoverable for 30 days, then it's gone. Before deleting, export the evidence we want to keep (already in `docs/evidence/`, no emails).
+**2. When the program ends: delete the project.** All teammate grants end on Dec 1 (time-boxed in `iam.yaml`). After grading, Mohamed deletes `roleready-515202`. That removes Firestore, BigQuery and the logs together. Google keeps a deleted project recoverable for 30 days, then it's gone. Before deleting, export the evidence we want to keep (already in `docs/evidence/`, no emails). The Data Studio dashboard reads Joclyn's own BigQuery Sandbox project (sample data), so deleting `roleready-515202` doesn't affect it. If the final video points the dashboard at `roleready-515202`'s BigQuery, delete the project only after grading.
 
 **3. For a real product (documented, not built).**
 - Keep 1 year of events per workspace in Firestore, then move older events to a Cloud Storage bucket with a locked retention policy, so nobody can edit or delete the archive early.
@@ -30,9 +30,9 @@
 
 ## Questions for the team
 
-1. OK to keep every event for the capstone, with no deletion (point 1)?
+1. OK to keep every event for the capstone, with no deletion (point 1)? **Joclyn: yes (Nov 20).**
 2. Mohamed: OK to delete `roleready-515202` after grading, and when (point 2)?
-3. Joclyn: does the dashboard need anything older than the current export? (It shouldn't, since the export replaces the table each run.)
+3. Joclyn: does the dashboard need anything older than the current export? **No (Nov 20): only the current export.**
 
 ## Once agreed
 
