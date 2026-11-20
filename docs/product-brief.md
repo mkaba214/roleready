@@ -115,7 +115,7 @@ The team will evaluate RoleReady against the following targets:
 | Expiration reliability | Zero duplicate expiration events after 10 repeated job runs |
 | Agent safety | Zero grants made without owner approval |
 | Agent accuracy | At least 27 of 30 invitation drafts correct |
-| Usability | Five first-time testers, targeting under two minutes per invitation |
+| Usability | Survey with three screenshot tasks rated for ease (1–5), plus one timed invite run per team member, targeting under two minutes (agreed Nov 18, see feedback log §4). Changed from "five first-time testers" (see D8 in `docs/decisions.md`) |
 
 These targets are proposed in the build plan and will be tested during development.
 
