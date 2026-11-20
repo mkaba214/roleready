@@ -35,6 +35,17 @@ class FakeGoogle:
         self.policies: dict[str, dict] = {}
         self.etags = itertools.count(1)
         self.calls: list[tuple[str, str, dict | None]] = []
+        # Real IAM can take up to a minute before a just-created service account is usable:
+        # name -> how many more policy calls naming it fail as if it didn't exist.
+        self.not_visible_yet: dict[str, int] = {}
+
+    def _invisible_sa(self, resource: str, body: dict | None) -> str | None:
+        named = [resource] + [m for b in (body or {}).get("policy", {}).get("bindings", []) for m in b["members"]]
+        for name, left in self.not_visible_yet.items():
+            if left > 0 and any(f"{name}@" in n for n in named):
+                self.not_visible_yet[name] = left - 1
+                return name
+        return None
 
     def _policy(self, resource: str) -> dict:
         return self.policies.setdefault(resource, {"bindings": [], "etag": f"e{next(self.etags)}"})
@@ -48,6 +59,8 @@ class FakeGoogle:
                 return FakeResponse(404, {"error": {"message": "secret not found"}})
             if "/serviceAccounts/" in resource and resource.rsplit("/", 1)[-1].split("@")[0] not in self.sas:
                 return FakeResponse(404, {"error": {"message": "sa not found"}})
+            if name := self._invisible_sa(resource, json):
+                return FakeResponse(400, {"error": {"message": f"Service account {name}@demo.iam.gserviceaccount.com does not exist."}})
             current = self._policy(resource)
             if verb == "getIamPolicy":
                 return FakeResponse(200, copy.deepcopy(current))
@@ -168,6 +181,48 @@ def test_gcp_never_creates_secret_values_and_turns_on_data_access_logs(spec) -> 
     assert sets[-1]["updateMask"] == "auditConfigs,bindings,etag"
     audit = fake.policies["/v1/projects/demo"]["auditConfigs"]
     assert audit == [{"service": "secretmanager.googleapis.com", "auditLogConfigs": [{"logType": "DATA_READ"}]}]
+
+
+def _gcp_ready(fake: FakeGoogle) -> None:
+    fake.secrets.add("nvidia-api-key")  # setup.sh made it; the integration key isn't created yet
+
+
+def test_apply_waits_for_service_accounts_it_just_created(spec) -> None:
+    # Phase 2 on Nov 19: the secret binding for a just-created roleready-run got
+    # "HTTP 400: Service account ... does not exist" and apply stopped halfway.
+    fake = FakeGoogle()
+    _gcp_ready(fake)
+    fake.not_visible_yet = {"roleready-run": 2}
+    waits: list[float] = []
+    plan = make_plan(gcp(fake), spec, TEAM)
+    assert "roleready-run" in plan.create_sas
+    apply_plan(gcp(fake), spec, plan, sleep=waits.append)
+    assert len(waits) == 2
+    again = make_plan(gcp(fake), spec, TEAM)
+    assert again.create_sas == []
+    assert [(r.kind, r.resource) for r in again.resources if r.add] == [("secret", "roleready-integration-key")]
+
+
+def test_apply_gives_up_if_a_new_service_account_never_appears(spec) -> None:
+    fake = FakeGoogle()
+    _gcp_ready(fake)
+    fake.not_visible_yet = {"roleready-run": 99}
+    waits: list[float] = []
+    with pytest.raises(CloudError, match="roleready-run.*does not exist"):
+        apply_plan(gcp(fake), spec, make_plan(gcp(fake), spec, TEAM), sleep=waits.append)
+    assert 0 < len(waits) <= 6 and sum(waits) <= 120
+
+
+def test_apply_does_not_retry_for_a_service_account_it_did_not_create(spec) -> None:
+    # An existing account that "does not exist" is a real error (typo, deleted): fail at once.
+    fake = FakeGoogle()
+    _gcp_ready(fake)
+    fake.sas |= {"roleready-run", "roleready-scheduler", "roleready-export"}
+    fake.not_visible_yet = {"roleready-run": 1}
+    waits: list[float] = []
+    with pytest.raises(CloudError, match="400"):
+        apply_plan(gcp(fake), spec, make_plan(gcp(fake), spec, TEAM), sleep=waits.append)
+    assert waits == []
 
 
 def test_concurrent_edit_fails_instead_of_overwriting(spec) -> None:
