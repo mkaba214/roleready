@@ -50,7 +50,7 @@ The policy engine decides access. The agent only proposes.
 | `GET /health`, `GET /config` | Anyone |
 | `GET /me` | Signed-in user |
 | `POST /invitations`, `GET /invitations`, `POST /invitations/{id}/approve`, `POST /invitations/{id}/cancel` | Owner |
-| `POST /invitations/accept` | Invitee with token, signed in as the invited email |
+| `POST /invitations/accept` | Invitee with token, signed in as the invited email. 5 failed tries in 15 minutes: 429 with `Retry-After` |
 | `GET /grants`, `POST /grants/{id}/revoke` | Owner |
 | `POST /actions/{task_type}` | Signed-in user. 200 allow, 403 deny. Both logged. |
 | `GET /audit`, `GET /audit/verify` | Owner |

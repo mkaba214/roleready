@@ -24,7 +24,7 @@ from .clock import Clock, SystemClock
 from .config import Settings
 from .llm import LLMClient, NvidiaClient
 from .models import Grant, InvitationRequest, Role
-from .services import RoleReadyService, ServiceError
+from .services import AttemptLimiter, RoleReadyService, ServiceError, TooManyRequests
 from .store import Store, build_store
 
 STATIC_DIR = Path(__file__).parent / "static"
@@ -74,6 +74,7 @@ def create_app(
         owner_email=settings.owner_email,
         invite_ttl=timedelta(hours=settings.invite_ttl_hours),
         default_timezone=settings.default_timezone,
+        accept_limiter=AttemptLimiter(settings.accept_max_failures, timedelta(minutes=settings.accept_lockout_minutes)),
     )
     app.state.service = base_svc
     if llm is None and settings.assistant_enabled:
@@ -102,7 +103,8 @@ def create_app(
         body: dict = {"detail": str(exc)}
         if getattr(exc, "errors", None):
             body["errors"] = exc.errors  # type: ignore[attr-defined]
-        return JSONResponse(body, status_code=exc.status_code)
+        headers = {"Retry-After": str(exc.retry_after)} if isinstance(exc, TooManyRequests) else None
+        return JSONResponse(body, status_code=exc.status_code, headers=headers)
 
     def svc_for(user: User) -> RoleReadyService:
         """The service, tagged with the client channel (web or an integration such as newly)."""
