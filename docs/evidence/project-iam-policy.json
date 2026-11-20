@@ -1,0 +1,246 @@
+{
+  "auditConfigs": [
+    {
+      "auditLogConfigs": [
+        {
+          "logType": "DATA_READ"
+        }
+      ],
+      "service": "secretmanager.googleapis.com"
+    }
+  ],
+  "bindings": [
+    {
+      "members": [
+        "serviceAccount:roleready-export@roleready-515202.iam.gserviceaccount.com"
+      ],
+      "role": "roles/bigquery.dataEditor"
+    },
+    {
+      "members": [
+        "serviceAccount:roleready-export@roleready-515202.iam.gserviceaccount.com"
+      ],
+      "role": "roles/bigquery.jobUser"
+    },
+    {
+      "condition": {
+        "description": "Time-boxed BUILD access, managed by infra/iam/iam.yaml",
+        "expression": "request.time < timestamp('2026-12-01T00:00:00Z')",
+        "title": "expires-2026-12-01"
+      },
+      "members": [
+        "user:joclyn@REDACTED"
+      ],
+      "role": "roles/bigquery.user"
+    },
+    {
+      "members": [
+        "serviceAccount:PROJECT_NUMBER@cloudbuild.gserviceaccount.com"
+      ],
+      "role": "roles/cloudbuild.builds.builder"
+    },
+    {
+      "members": [
+        "serviceAccount:service-PROJECT_NUMBER@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+      ],
+      "role": "roles/cloudbuild.serviceAgent"
+    },
+    {
+      "condition": {
+        "description": "Time-boxed BUILD access, managed by infra/iam/iam.yaml",
+        "expression": "request.time < timestamp('2026-12-01T00:00:00Z')",
+        "title": "expires-2026-12-01"
+      },
+      "members": [
+        "user:mohamed@REDACTED"
+      ],
+      "role": "roles/cloudscheduler.admin"
+    },
+    {
+      "members": [
+        "serviceAccount:service-PROJECT_NUMBER@gcp-sa-cloudscheduler.iam.gserviceaccount.com"
+      ],
+      "role": "roles/cloudscheduler.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:service-PROJECT_NUMBER@containerregistry.iam.gserviceaccount.com"
+      ],
+      "role": "roles/containerregistry.ServiceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:roleready-run@roleready-515202.iam.gserviceaccount.com"
+      ],
+      "role": "roles/datastore.user"
+    },
+    {
+      "members": [
+        "serviceAccount:roleready-export@roleready-515202.iam.gserviceaccount.com"
+      ],
+      "role": "roles/datastore.viewer"
+    },
+    {
+      "condition": {
+        "description": "Time-boxed BUILD access, managed by infra/iam/iam.yaml",
+        "expression": "request.time < timestamp('2026-12-01T00:00:00Z')",
+        "title": "expires-2026-12-01"
+      },
+      "members": [
+        "user:joclyn@REDACTED"
+      ],
+      "role": "roles/datastore.viewer"
+    },
+    {
+      "members": [
+        "serviceAccount:PROJECT_NUMBER-compute@developer.gserviceaccount.com"
+      ],
+      "role": "roles/editor"
+    },
+    {
+      "condition": {
+        "description": "Time-boxed BUILD access, managed by infra/iam/iam.yaml",
+        "expression": "request.time < timestamp('2026-12-01T00:00:00Z')",
+        "title": "expires-2026-12-01"
+      },
+      "members": [
+        "user:andrew@REDACTED"
+      ],
+      "role": "roles/firebaseauth.admin"
+    },
+    {
+      "members": [
+        "serviceAccount:service-PROJECT_NUMBER@firebase-rules.iam.gserviceaccount.com"
+      ],
+      "role": "roles/firebaserules.system"
+    },
+    {
+      "members": [
+        "serviceAccount:service-PROJECT_NUMBER@gcp-sa-firestore.iam.gserviceaccount.com"
+      ],
+      "role": "roles/firestore.serviceAgent"
+    },
+    {
+      "condition": {
+        "description": "Time-boxed BUILD access, managed by infra/iam/iam.yaml",
+        "expression": "request.time < timestamp('2026-12-01T00:00:00Z')",
+        "title": "expires-2026-12-01"
+      },
+      "members": [
+        "user:andrew@REDACTED"
+      ],
+      "role": "roles/iam.securityReviewer"
+    },
+    {
+      "condition": {
+        "expression": "request.time < timestamp('2026-12-01T00:00:00Z')",
+        "title": "expires-2026-12-01"
+      },
+      "members": [
+        "user:andrew@REDACTED"
+      ],
+      "role": "roles/iam.serviceAccountAdmin"
+    },
+    {
+      "condition": {
+        "description": "Time-boxed BUILD access, managed by infra/iam/iam.yaml",
+        "expression": "request.time < timestamp('2026-12-01T00:00:00Z')",
+        "title": "expires-2026-12-01"
+      },
+      "members": [
+        "user:andrew@REDACTED"
+      ],
+      "role": "roles/logging.privateLogViewer"
+    },
+    {
+      "condition": {
+        "description": "Time-boxed BUILD access, managed by infra/iam/iam.yaml",
+        "expression": "request.time < timestamp('2026-12-01T00:00:00Z')",
+        "title": "expires-2026-12-01"
+      },
+      "members": [
+        "user:mohamed@REDACTED"
+      ],
+      "role": "roles/logging.viewer"
+    },
+    {
+      "members": [
+        "user:mohamed@REDACTED"
+      ],
+      "role": "roles/owner"
+    },
+    {
+      "members": [
+        "serviceAccount:service-PROJECT_NUMBER@gcp-sa-pubsub.iam.gserviceaccount.com"
+      ],
+      "role": "roles/pubsub.serviceAgent"
+    },
+    {
+      "condition": {
+        "expression": "request.time < timestamp('2026-12-01T00:00:00Z')",
+        "title": "expires-2026-12-01"
+      },
+      "members": [
+        "user:andrew@REDACTED"
+      ],
+      "role": "roles/resourcemanager.projectIamAdmin"
+    },
+    {
+      "condition": {
+        "description": "Time-boxed BUILD access, managed by infra/iam/iam.yaml",
+        "expression": "request.time < timestamp('2026-12-01T00:00:00Z')",
+        "title": "expires-2026-12-01"
+      },
+      "members": [
+        "user:mohamed@REDACTED"
+      ],
+      "role": "roles/run.admin"
+    },
+    {
+      "members": [
+        "serviceAccount:service-PROJECT_NUMBER@serverless-robot-prod.iam.gserviceaccount.com"
+      ],
+      "role": "roles/run.serviceAgent"
+    },
+    {
+      "condition": {
+        "description": "Time-boxed BUILD access, managed by infra/iam/iam.yaml",
+        "expression": "request.time < timestamp('2026-12-01T00:00:00Z')",
+        "title": "expires-2026-12-01"
+      },
+      "members": [
+        "user:mohamed@REDACTED"
+      ],
+      "role": "roles/run.sourceDeveloper"
+    },
+    {
+      "condition": {
+        "expression": "request.time < timestamp('2026-12-01T00:00:00Z')",
+        "title": "expires-2026-12-01"
+      },
+      "members": [
+        "user:andrew@REDACTED"
+      ],
+      "role": "roles/secretmanager.admin"
+    },
+    {
+      "condition": {
+        "description": "Time-boxed BUILD access, managed by infra/iam/iam.yaml",
+        "expression": "request.time < timestamp('2026-12-01T00:00:00Z')",
+        "title": "expires-2026-12-01"
+      },
+      "members": [
+        "user:mohamed@REDACTED"
+      ],
+      "role": "roles/serviceusage.serviceUsageConsumer"
+    },
+    {
+      "members": [
+        "user:andrew@REDACTED"
+      ],
+      "role": "roles/serviceusage.serviceUsageViewer"
+    }
+  ],
+  "etag": "BwZgqhZSJXo=",
+  "version": 3
+}
