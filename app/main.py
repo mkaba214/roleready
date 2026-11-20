@@ -144,6 +144,10 @@ def create_app(
             "firebase_auth_emulator_url": (
                 f"http://{settings.firebase_auth_emulator_host}" if settings.firebase_auth_emulator_host else None
             ),
+            # Firebase's Google provider must be on, and the emulator has no Google popup.
+            "google_sign_in": bool(
+                firebase and settings.firebase_google_sign_in and not settings.firebase_auth_emulator_host
+            ),
             "assistant_enabled": assistant is not None,
             "timezone": settings.default_timezone,
         }
