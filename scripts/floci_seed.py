@@ -6,6 +6,8 @@ Firestore round trip to prove the app's data path works.
   python scripts/floci_seed.py --password 'a-local-password'
 
 Uses only the requests library and Floci's REST endpoints (Firebase Auth emulator API).
+Seeded users are marked email-verified, because the app refuses unverified emails (threat S5).
+Safe to rerun: existing users are kept and marked verified.
 Then sign in on http://localhost:8000 with any seeded email and the password.
 """
 
@@ -17,6 +19,23 @@ import os
 import requests
 
 USERS = ["owner@bloomandcrumb.test", "sam@freelance.test", "riley@client.test"]
+
+
+def mark_verified(base: str, email: str) -> None:
+    """Set emailVerified with the emulator's admin credential ("Bearer owner"). Users can't do this themselves."""
+    admin = {"Authorization": "Bearer owner"}
+    r = requests.post(f"{base}/identitytoolkit.googleapis.com/v1/accounts:lookup", headers=admin, json={"email": [email]}, timeout=15)
+    users = r.json().get("users") if r.ok else None
+    if not users:
+        raise SystemExit(f"Could not look up {email}: HTTP {r.status_code} {r.text[:200]}")
+    r = requests.post(
+        f"{base}/identitytoolkit.googleapis.com/v1/accounts:update",
+        headers=admin,
+        json={"localId": users[0]["localId"], "emailVerified": True},
+        timeout=15,
+    )
+    if not (r.ok and r.json().get("emailVerified")):
+        raise SystemExit(f"Could not mark {email} verified: HTTP {r.status_code} {r.text[:200]}")
 
 
 def main() -> None:
@@ -41,6 +60,7 @@ def main() -> None:
             print(f"  exists  {email}")
         else:
             raise SystemExit(f"Could not create {email}: HTTP {r.status_code} {r.text[:200]}")
+        mark_verified(base, email)
 
     # Firestore round trip through the official client (same library the app uses)
     os.environ.setdefault("FIRESTORE_EMULATOR_HOST", base.split("://", 1)[-1])
