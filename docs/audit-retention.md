@@ -1,6 +1,6 @@
-# Audit retention (proposal, owner: Andrew)
+# Audit retention (owner: Andrew)
 
-**Status: Proposed.** This answers the threat-model open item "decide audit retention (how long to keep events) and write it in the README". Once the team agrees, it becomes decision D9 in `docs/decisions.md`, and the README gets one line under Known limitations.
+**Status: Decided (Team, Nov 20), decision D9 in `docs/decisions.md`.** This answers the threat-model open item "decide audit retention (how long to keep events) and write it in the README". The README has one line on it under Known limitations.
 
 ## What we keep today
 
@@ -20,7 +20,7 @@
 - No code change. The chain stays whole and `verify_chain()` keeps checking from the first event.
 - Keep Google's log defaults: 400 days for Admin Activity, 30 days for Data Access. 30 days covers the leaked-key check in `docs/incident-nvidia-key.md` for the life of the capstone. Longer retention in `_Default` costs money.
 
-**2. When the program ends: delete the project.** All teammate grants end on Dec 1 (time-boxed in `iam.yaml`). After grading, Mohamed deletes `roleready-515202`. That removes Firestore, BigQuery and the logs together. Google keeps a deleted project recoverable for 30 days, then it's gone. Before deleting, export the evidence we want to keep (already in `docs/evidence/`, no emails). The Data Studio dashboard reads Joclyn's own BigQuery Sandbox project (sample data), so deleting `roleready-515202` doesn't affect it. If the final video points the dashboard at `roleready-515202`'s BigQuery, delete the project only after grading.
+**2. When the program ends: delete the project.** All teammate grants end on Dec 1 (time-boxed in `iam.yaml`). After grading, Mohamed deletes `roleready-515202`, around **Dec 31** once grading is confirmed. That removes Firestore, BigQuery and the logs together. Google keeps a deleted project recoverable for 30 days, then it's gone. Before deleting, export the evidence we want to keep (already in `docs/evidence/`, no emails). The Data Studio dashboard reads Joclyn's own BigQuery Sandbox project (sample data), so deleting `roleready-515202` doesn't affect it. If the final video points the dashboard at `roleready-515202`'s BigQuery, delete the project only after grading.
 
 **3. For a real product (documented, not built).**
 - Keep 1 year of events per workspace in Firestore, then move older events to a Cloud Storage bucket with a locked retention policy, so nobody can edit or delete the archive early.
@@ -28,14 +28,14 @@
 - When an owner closes the workspace, delete its events after 30 days.
 - Freelancer emails sit inside the hashed rows, so one person's data can't be erased without breaking the chain. Fix before handling real customer data: store a per-workspace pseudonym (a keyed hash of the email) in audit rows, and keep the email-to-pseudonym map outside the chain, where it can be deleted.
 
-## Questions for the team
+## Team answers
 
 1. OK to keep every event for the capstone, with no deletion (point 1)? **Joclyn: yes (Nov 20).**
-2. Mohamed: OK to delete `roleready-515202` after grading, and when (point 2)?
+2. Mohamed: OK to delete `roleready-515202` after grading, and when (point 2)? **Mohamed: yes (Nov 20), around Dec 31, once grading is confirmed.** The Sandbox dashboard isn't affected; a dashboard on `roleready-515202`'s BigQuery keeps working until then.
 3. Joclyn: does the dashboard need anything older than the current export? **No (Nov 20): only the current export.**
 
-## Once agreed
+## Done
 
-- `docs/decisions.md`: add D9 with the date and who decided
-- `README.md` Known limitations: "Audit events are kept for the life of the demo project; a real product would archive after a year with a chain checkpoint (`docs/audit-retention.md`)."
-- `docs/threat-model.md`: tick the open item and link here
+- `docs/decisions.md`: D9 (Decided, Team, Nov 20)
+- `README.md` Known limitations: one line linking here
+- `docs/threat-model.md`: open item ticked, links here
