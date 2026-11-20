@@ -1,0 +1,24 @@
+# PR #39 on roleready-515202, Nov 20 2026, run by Andrew. Emails redacted.
+
+$ python scripts/iam.py plan --target gcp --project roleready-515202
+IAM plan for gcp project roleready-515202
+  ! secret roleready-integration-key does not exist (create it first)
+  + project:roleready-515202  roles/serviceusage.serviceUsageConsumer -> user:andrew@REDACTED  [time-boxed]
+  !! DANGER project:roleready-515202  roles/editor granted to service account serviceAccount:PROJECT_NUMBER-compute@developer.gserviceaccount.com
+  + secret:roleready-integration-key  roles/secretmanager.secretAccessor -> serviceAccount:roleready-run@roleready-515202.iam.gserviceaccount.com
+
+2 change(s) to apply, 2 finding(s) to review.
+
+$ python scripts/iam.py apply --target gcp --project roleready-515202
+Apply 2 change(s) to roleready-515202? Type the project id to confirm: roleready-515202
+  done: project:roleready-515202 + roles/serviceusage.serviceUsageConsumer -> user:andrew@REDACTED (until 2026-12-01T00:00:00Z)
+  done: SKIPPED secret roleready-integration-key: create it first (infra/setup.sh, or gcloud secrets create for the integration key)
+Applied. Run plan again: it should show 0 changes.
+
+$ python scripts/iam.py plan --target gcp --project roleready-515202
+IAM plan for gcp project roleready-515202
+  ! secret roleready-integration-key does not exist (create it first)
+  !! DANGER project:roleready-515202  roles/editor granted to service account serviceAccount:PROJECT_NUMBER-compute@developer.gserviceaccount.com
+  + secret:roleready-integration-key  roles/secretmanager.secretAccessor -> serviceAccount:roleready-run@roleready-515202.iam.gserviceaccount.com
+
+1 change(s) to apply, 2 finding(s) to review.

@@ -67,9 +67,11 @@ gcloud projects get-iam-policy $PROJECT_ID --format=json \
   | sed -E 's/user:[^"]+/user:REDACTED/g' > docs/evidence/project-iam-policy.json   # no emails in the repo
 gcloud secrets get-iam-policy nvidia-api-key
 gcloud policy-intelligence troubleshoot-policy iam \
-  //secretmanager.googleapis.com/projects/$PROJECT_ID/secrets/nvidia-api-key \
-  --principal-email=JOCLYN_EMAIL --permission=secretmanager.versions.access   # expect: not granted
+  //secretmanager.googleapis.com/projects/$PROJECT_NUMBER/secrets/nvidia-api-key \
+  --principal-email=JOCLYN_EMAIL --permission=secretmanager.versions.access   # expect: CANNOT_ACCESS
 ```
+
+The secret's name needs the project **number** (`gcloud projects describe $PROJECT_ID --format='value(projectNumber)'`); the project id gives `INVALID_ARGUMENT`. Policy Troubleshooter bills your quota project, so it needs `serviceUsageConsumer` (#39), and a new grant can take 10+ minutes before calls stop failing with `USER_PROJECT_DENIED`.
 
 Ask Joclyn to run `gcloud secrets versions access latest --secret=nvidia-api-key` and screenshot the PERMISSION_DENIED.
 
