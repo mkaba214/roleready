@@ -6,14 +6,32 @@ Feedback the team received, and what changed because of it. Four sources: the us
 
 **What:** a Google Form with problem questions (Part 1) and a screenshot-based section (Part 2). Part 2 shows three tasks from the owner's journey: invite a freelancer for this week, see what the freelancer did, and remove the freelancer's access now. For each, respondents say what they would click and rate how easy it looks (1-5). A final question rates how useful RoleReady would be (1-5).
 **Why screenshots:** outside people don't use the app hands-on (D8).
-**Shared:** on LinkedIn, the #mmc-build Slack, and through teammates.
-**Responses:** collection is open. The table is filled in as responses arrive.
+**Shared:** from Nov 10, on LinkedIn, the #mmc-build Slack, and through teammates. First response Nov 16.
+**Responses:** 5 as of Nov 20 (Nov 16-19). Collection stays open until Nov 23. No names or contact details were collected.
 
 | Respondent | Type (owner / freelancer / other) | What they said | Theme | Effect on RoleReady |
 | --- | --- | --- | --- | --- |
-| R1 | | | | |
+| R1 | Freelancer | Getting access meant "a lot of back and forth". Access sometimes stays active after a project ends. Rated all three tasks 5 and usefulness 5. Wants to filter the audit history by person and date | The problem is real; audit history needs filters | Confirms the problem. Audit filters: issue #41, after submission |
+| R2 | Both (owner and freelancer) | No access problems; access expires automatically where they work. Noticed the 7-day limit on the invite. Rated all three tasks 3 and usefulness 2 | Tools they already use may handle this | None. The lowest usefulness rating, from someone whose access already expires |
+| R3 | Freelancer | No access problems. Rated the tasks 5, 4, 5 and usefulness 4. No written answers to the tasks | | None |
+| R4 | Freelancer | Has waited for access to be unlocked, and has shared usernames and passwords. Access sometimes stays active after a project ends. Described the invite steps correctly. For Task 2, would look at the Action column "or see if I could ask the assistant". Rated the tasks 4, 3, 3 and usefulness 4. Wants to know "what I had access to and how long for" | The problem is real; the freelancer's view | Confirms the problem. The freelancer view already shows the access window; nothing changed |
+| R5 | Other (neither) | Unsure how to remove access ("not sure, revoke maybe?"). Rated the tasks 1, 1, 2 but usefulness 5. Wants "clear simple text" | Plain language | Check the screen labels for plain wording: issue #41, after submission |
 
-**Summary of themes:** written once responses are in.
+**Summary of themes** (n = 5, so these are early signals, not results):
+
+| Question | Average (1-5) | Ratings |
+| --- | --- | --- |
+| Task 1: invite | 3.6 | 5, 3, 5, 4, 1 |
+| Task 2: see what they did | 3.2 | 5, 3, 4, 3, 1 |
+| Task 3: remove access | 3.6 | 5, 3, 5, 3, 2 |
+| How useful | 4.0 | 5, 2, 4, 4, 5 |
+
+1. **The problem is real for some:** 2 of 5 say access sometimes stays active after a project ends, and 2 of 5 had trouble getting access. One shares usernames and passwords.
+2. **"See what they did" was the hardest task (3.2).** Respondents looked for the right columns ("actor", "action") but were less sure. One asked for filters by person and date.
+3. **Invite is clear; remove less so:** 3 of the 4 who answered Task 1 described the invite steps. For Task 3, 3 of the 4 who answered found the Revoke button, but 2 of them weren't sure ("assuming it is a button", "not sure, revoke maybe?").
+4. **Plain language:** the respondent who rated the tasks lowest still rated usefulness 5 and asked for "clear simple text".
+
+**Limits:** no respondent answered as only a small business owner, the person the screenshots show. Most respondents are freelancers. The brief sets no target for the ease ratings, so they are reported, not scored as pass or fail.
 
 ## 2. Team testing and agent evaluation
 

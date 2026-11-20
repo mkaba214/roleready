@@ -10,4 +10,6 @@ Applied by Andrew with `python scripts/iam.py apply --target gcp --project roler
 
 Re-plan after apply shows 1 change: the `roleready-integration-key` accessor binding, skipped because that secret isn't created yet (D2). One finding stays on purpose: Google's default `roles/editor` on the Compute Engine default service account, used by the first source deploy. Issue #35 removes it once we're live.
 
-Still to capture: Joclyn's `PERMISSION_DENIED` on `gcloud secrets versions access latest --secret=nvidia-api-key` (screenshot) and the `troubleshoot-policy` check (see `docs/iam-runbook.md` Phase 2 step 3).
+- `permission-denied-nvidia-key.png` (Nov 20): Joclyn, signed in with her own account, runs `gcloud secrets versions access latest --secret=nvidia-api-key --project=roleready-515202` and gets `PERMISSION_DENIED` (`secretmanager.versions.access`, `IAM_PERMISSION_DENIED`). A team member with project access still can't read the key. Her email is blacked out.
+
+Still to capture: the `troubleshoot-policy` check (see `docs/iam-runbook.md` Phase 2 step 3).
