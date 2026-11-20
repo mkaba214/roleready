@@ -22,6 +22,8 @@ class Settings:
     owner_email: str = "owner@bloomandcrumb.test"
     default_timezone: str = "America/Chicago"
     invite_ttl_hours: int = 72
+    accept_max_failures: int = 5  # failed invite-link tries per signed-in user before a lockout
+    accept_lockout_minutes: int = 15  # rolling window for those failures
 
     nvidia_api_key: str = ""
     nvidia_model: str = "nvidia/nemotron-3.5-lightning-30b-a3b"
@@ -63,6 +65,8 @@ class Settings:
             owner_email=e("OWNER_EMAIL", cls.owner_email).strip().lower(),
             default_timezone=e("DEFAULT_TIMEZONE", cls.default_timezone),
             invite_ttl_hours=int(e("INVITE_TTL_HOURS", str(cls.invite_ttl_hours))),
+            accept_max_failures=int(e("ACCEPT_MAX_FAILURES", str(cls.accept_max_failures))),
+            accept_lockout_minutes=int(e("ACCEPT_LOCKOUT_MINUTES", str(cls.accept_lockout_minutes))),
             nvidia_api_key=e("NVIDIA_API_KEY", "").strip(),
             nvidia_model=e("NVIDIA_MODEL", cls.nvidia_model).strip(),
             nvidia_base_url=e("NVIDIA_BASE_URL", cls.nvidia_base_url).rstrip("/"),
@@ -92,6 +96,8 @@ class Settings:
             )
         if self.integration_api_key and len(self.integration_api_key) < 32:
             raise RuntimeError("INTEGRATION_API_KEY must be at least 32 random characters (python -c \"import secrets; print(secrets.token_urlsafe(32))\")")
+        if self.accept_max_failures < 1 or self.accept_lockout_minutes < 1:
+            raise RuntimeError("ACCEPT_MAX_FAILURES and ACCEPT_LOCKOUT_MINUTES must be at least 1")
         if "*" in self.cors_allowed_origins:
             raise RuntimeError("CORS_ALLOWED_ORIGINS must list exact origins, not '*'")
         if self.firebase_auth_emulator_host and self.running_on_cloud_run:

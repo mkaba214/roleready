@@ -10,10 +10,12 @@ import copy
 import hashlib
 import hmac
 import logging
+import math
 import secrets
-from collections import Counter
+import threading
+from collections import Counter, deque
 from dataclasses import dataclass, field
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import Any
 
 from . import policy
@@ -54,6 +56,53 @@ class Conflict(ServiceError):
 
 class Gone(ServiceError):
     status_code = 410
+
+
+class TooManyRequests(ServiceError):
+    status_code = 429
+
+    def __init__(self, message: str, retry_after: int) -> None:
+        super().__init__(message)
+        self.retry_after = retry_after
+
+
+class AttemptLimiter:
+    """Counts failures per key in a rolling window. In memory, so each Cloud Run instance keeps
+    its own count (max 3 instances): defense in depth, not the main control."""
+
+    def __init__(self, max_failures: int = 5, window: timedelta = timedelta(minutes=15)) -> None:
+        self.max_failures = max_failures
+        self.window = window
+        self._failures: dict[str, deque[datetime]] = {}
+        self._lock = threading.Lock()
+
+    def _recent(self, key: str, now: datetime) -> deque[datetime]:
+        times = self._failures.get(key, deque())
+        while times and now - times[0] >= self.window:
+            times.popleft()
+        if not times:
+            self._failures.pop(key, None)
+        return times
+
+    def retry_after(self, key: str, now: datetime) -> int:
+        """Seconds until `key` may try again; 0 when it isn't locked out."""
+        with self._lock:
+            times = self._recent(key, now)
+            if len(times) < self.max_failures:
+                return 0
+            return max(1, math.ceil((times[0] + self.window - now).total_seconds()))
+
+    def record_failure(self, key: str, now: datetime) -> bool:
+        """Count one failure. True when this failure reaches the limit."""
+        with self._lock:
+            times = self._recent(key, now)
+            times.append(now)
+            self._failures[key] = times
+            return len(times) == self.max_failures
+
+    def clear(self, key: str) -> None:
+        with self._lock:
+            self._failures.pop(key, None)
 
 
 class ValidationFailed(ServiceError):
@@ -97,8 +146,10 @@ class RoleReadyService:
         owner_email: str,
         invite_ttl: timedelta = timedelta(hours=72),
         default_timezone: str = "America/Chicago",
+        accept_limiter: AttemptLimiter | None = None,
     ) -> None:
         self.store = store
+        self.accept_limiter = accept_limiter or AttemptLimiter()
         self.clock = clock
         self.workspace_id = workspace_id
         self.owner_email = owner_email.strip().lower()
@@ -236,12 +287,34 @@ class RoleReadyService:
         return inv
 
     def accept_invitation(self, user_email: str, token: str) -> Grant:
+        """Rate-limited per signed-in user: too many failed links in a row and that user waits."""
         user_email = user_email.strip().lower()
+        now = self.clock.now()
+        limiter = self.accept_limiter
+        wait = limiter.retry_after(user_email, now)
+        if wait:
+            log.warning("invite accept refused: too many failed attempts")  # audited once, at the lockout
+            raise TooManyRequests(f"too many failed invitation attempts; try again in {math.ceil(wait / 60)} minutes", wait)
+        try:
+            grant = self._accept_invitation(user_email, token, now)
+        except ServiceError:
+            if limiter.record_failure(user_email, now):
+                self._audit(
+                    user_email,
+                    "invitation.accept",
+                    decision=Decision.DENY,
+                    reason="too_many_attempts",
+                    details={"max_failures": limiter.max_failures, "window_minutes": int(limiter.window.total_seconds() // 60)},
+                )
+            raise
+        limiter.clear(user_email)
+        return grant
+
+    def _accept_invitation(self, user_email: str, token: str, now: datetime) -> Grant:
         inv = self.store.find_invitation_by_token_hash(hash_token(token or ""))
         if inv is None:
             self._audit(user_email, "invitation.accept", decision=Decision.DENY, reason="invalid_token")
             raise NotFound("invitation not found")
-        now = self.clock.now()
         if inv.status == InvitationStatus.ACCEPTED:
             self._audit(user_email, "invitation.accept", target=inv.id, decision=Decision.DENY, reason="token_reused")
             raise Gone("this invitation link was already used")
