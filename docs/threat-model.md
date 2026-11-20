@@ -66,5 +66,5 @@ The integration is off unless `INTEGRATION_API_KEY` is set, and the MVP doesn't 
 - [x] S5: Firebase ID tokens whose `email_verified` isn't true are refused (#21). Seeded and admin-created accounts are marked verified; freelancers get a password-setup link from `scripts/firebase_user.py`, not self sign-up
 - [ ] Rate-limit failed accept attempts per IP (Cloud Armor or an in-app counter).
 - [ ] Decide audit retention (how long to keep events) and write it in the README.
-- [ ] Consent text for the 5 user-testing sessions.
+- [x] Consent text for the 5 user-testing sessions: not needed. Outside people don't use the app hands-on (D8); survey respondents see only screenshots.
 - [x] Incident steps if the NVIDIA key leaks: [docs/incident-nvidia-key.md](incident-nvidia-key.md) (revoke first, new secret version, new revision, disable the old version, check the Secret Manager read logs).
