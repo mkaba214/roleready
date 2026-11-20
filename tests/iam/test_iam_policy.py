@@ -38,6 +38,15 @@ def test_only_andrew_administers_firebase_auth(spec) -> None:
     assert admins == {"person:andrew"}
 
 
+def test_firebase_auth_admins_can_run_firebase_user_py(spec) -> None:
+    # scripts/firebase_user.py runs on local Application Default Credentials. Identity Toolkit
+    # refuses user ADC without a quota project, and setting one needs serviceusage.services.use
+    # (Nov 20: "set-quota-project ... does not have serviceusage.services.use").
+    held = {(b.member, b.role) for b in expand(spec)}
+    admins = {m for m, r in held if r == "roles/firebaseauth.admin"}
+    assert admins and all((m, "roles/serviceusage.serviceUsageConsumer") in held for m in admins)
+
+
 def test_scheduler_has_no_project_roles(spec) -> None:
     assert not [b for b in expand(spec) if b.member == "sa:roleready-scheduler"]
 
