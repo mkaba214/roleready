@@ -176,3 +176,24 @@ def test_concurrent_edit_fails_instead_of_overwriting(spec) -> None:
     fake.policies["/v1/projects/demo"]["etag"] = "changed-by-someone-else"
     with pytest.raises(CloudError, match="409"):
         apply_plan(floci(fake), spec, plan)
+
+
+def test_gcloud_token_finds_gcloud_cmd_on_windows(monkeypatch) -> None:
+    """On Windows gcloud is gcloud.cmd, which subprocess can't find by the bare name (WinError 2)."""
+    import subprocess
+
+    import scripts.iam as iam
+
+    calls = []
+    monkeypatch.setattr(iam.shutil, "which", lambda name: r"C:\sdk\bin\gcloud.cmd" if name == "gcloud" else None)
+    monkeypatch.setattr(iam.subprocess, "run", lambda argv, **kw: calls.append(argv) or subprocess.CompletedProcess(argv, 0, "tok\n", ""))
+    assert iam.gcloud_token() == "tok"
+    assert calls == [[r"C:\sdk\bin\gcloud.cmd", "auth", "print-access-token"]]
+
+
+def test_gcloud_token_without_gcloud_says_so(monkeypatch) -> None:
+    import scripts.iam as iam
+
+    monkeypatch.setattr(iam.shutil, "which", lambda name: None)
+    with pytest.raises(SystemExit, match="gcloud is not installed or not on PATH"):
+        iam.gcloud_token()
