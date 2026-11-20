@@ -42,7 +42,7 @@ The integration is off unless `INTEGRATION_API_KEY` is set, and the MVP doesn't 
 
 | # | Threat | Example | Control | Test |
 | --- | --- | --- | --- | --- |
-| S5 | Spoofing | Mallory creates a Firebase email/password account for sam@freelance.test (or the owner's email) before the real person does, using the public web API key | **Open.** The server doesn't check the token's `email_verified` claim yet. See open items | None yet |
+| S5 | Spoofing | Mallory creates a Firebase email/password account for sam@freelance.test (or the owner's email) before the real person does, using the public web API key | **Mitigated.** `app/auth.py` refuses Firebase tokens unless `email_verified` is true. Accounts are made already verified (`scripts/floci_seed.py` locally, `scripts/firebase_user.py` on the real project) before the invite link goes out; `firebase_user.py` refuses to bless an existing unverified account without `--replace` | `test_firebase_sign_in_with_unverified_email_is_refused`, `test_firebase_sign_in_with_verified_email_works` |
 | S6 | Spoofing | Someone calls the demo-only expiry route in production | `/dev/run-expiry` exists only in demo mode; demo mode refuses to start on Cloud Run unless `ALLOW_DEMO_AUTH_ON_CLOUD_RUN=true` (hackathon fallback only) | `test_dev_expiry_route_only_in_demo` |
 | S7 | Spoofing | Someone guesses an invite link | 256-bit random token (`secrets.token_urlsafe(32)`), looked up by SHA-256 hash; unknown tokens get 404 and an `invalid_token` audit row; after 5 failed tries in 15 minutes the signed-in user gets 429 with `Retry-After` (even for a good link), and one `too_many_attempts` audit row is written | `test_forged_and_expired_tokens`, `test_five_failures_lock_out_that_user_only`, `test_lockout_is_audited_once` |
 | D3 | Denial of service | A stranger tries Sam's link first to use it up | A refused accept (`wrong_user`) leaves the invitation approved, so Sam can still accept | `test_wrong_person_cannot_use_token` |
@@ -56,7 +56,7 @@ The integration is off unless `INTEGRATION_API_KEY` is set, and the MVP doesn't 
 
 ## Open items
 
-- [ ] S5: reject Firebase ID tokens whose `email_verified` is false (test first in `tests/test_api.py`). Before turning it on, account setup must mark emails verified: Firebase console users, `scripts/floci_seed.py`, and a verify-email step for freelancers who sign up themselves. Until then, create freelancer accounts before sending the invite link, so nobody can claim the email first.
+- [x] S5: Firebase ID tokens whose `email_verified` isn't true are refused (#21). Seeded and admin-created accounts are marked verified; freelancers get a password-setup link from `scripts/firebase_user.py`, not self sign-up
 - [x] Rate-limit failed accept attempts: in-app, per signed-in user rather than per IP (accept requires sign-in, and a client can put any address in `X-Forwarded-For`). A stranger's failures count against the stranger, never against Sam, so D3 still holds. The count is in memory per Cloud Run instance (max 3), which is fine for defense in depth on 256-bit tokens. Settings: `ACCEPT_MAX_FAILURES` (5), `ACCEPT_LOCKOUT_MINUTES` (15).
 - [ ] Decide audit retention (how long to keep events) and write it in the README.
 - [ ] Consent text for the 5 user-testing sessions.
