@@ -1,0 +1,34 @@
+{
+  "command": "gcloud policy-intelligence troubleshoot-policy iam //secretmanager.googleapis.com/projects/PROJECT_NUMBER/secrets/nvidia-api-key --principal-email=joclyn@REDACTED --permission=secretmanager.versions.access --format=json",
+  "run": "2026-11-20 by Andrew; full output trimmed to the verdicts below (the raw output lists every binding's members)",
+  "accessTuple": {
+    "conditionContext": {
+      "destination": {},
+      "request": {},
+      "resource": {}
+    },
+    "fullResourceName": "//secretmanager.googleapis.com/projects/PROJECT_NUMBER/secrets/nvidia-api-key",
+    "permission": "secretmanager.versions.access",
+    "permissionFqdn": "secretmanager.googleapis.com/versions.access",
+    "principal": "joclyn@REDACTED"
+  },
+  "overallAccessState": "CANNOT_ACCESS",
+  "allowPolicyExplanation": {
+    "allowAccessState": "ALLOW_ACCESS_STATE_NOT_GRANTED",
+    "explainedPolicies": [
+      {
+        "fullResourceName": "//secretmanager.googleapis.com/projects/PROJECT_NUMBER/secrets/nvidia-api-key",
+        "allowAccessState": "ALLOW_ACCESS_STATE_NOT_GRANTED"
+      },
+      {
+        "fullResourceName": "//cloudresourcemanager.googleapis.com/projects/roleready-515202",
+        "allowAccessState": "ALLOW_ACCESS_STATE_NOT_GRANTED"
+      }
+    ]
+  },
+  "denyPolicyExplanation": {
+    "denyAccessState": "DENY_ACCESS_STATE_NOT_DENIED",
+    "permissionDeniable": true,
+    "relevance": "HEURISTIC_RELEVANCE_NORMAL"
+  }
+}

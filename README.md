@@ -89,13 +89,14 @@ Coverage: the permission matrix, a 60-case role x task x state grid, time-window
 export PROJECT_ID=your-project-id
 bash infra/setup.sh                                          # APIs, Firestore, NVIDIA key value
 python scripts/iam.py apply --target gcp --project $PROJECT_ID   # Andrew: service accounts + every IAM grant
+# Mohamed, Firebase console: add Firebase to the project, then Authentication > Get started > Sign-in method > Email/Password on
 npx firebase-tools deploy --only firestore:rules --project $PROJECT_ID
 OWNER_EMAIL=owner@yourdomain.test FIREBASE_API_KEY=... bash infra/deploy.sh
 bash infra/scheduler.sh
 python scripts/firebase_user.py --project $PROJECT_ID add owner@yourdomain.test   # repeat per teammate and freelancer
 ```
 
-Sign-in only accepts verified emails (threat S5), so create each account with `scripts/firebase_user.py` before sending the invite link. It prints a password-setup link; send it to that same email address.
+Sign-in only accepts verified emails (threat S5), so create each account with `scripts/firebase_user.py` before sending the invite link. It prints a password-setup link; send it to that same email address. `CONFIGURATION_NOT_FOUND` from `firebase_user.py` means the Firebase console step above isn't done yet.
 
 Optional, **Sign in with Google** next to email and password: in the Firebase console, turn on Authentication > Sign-in method > Google, and add the Cloud Run hostname under Authentication > Settings > Authorized domains. Then deploy with `FIREBASE_GOOGLE_SIGN_IN=true`. It works for Gmail and Google Workspace addresses; anyone else uses the password-setup link. Signing in grants nothing by itself: access still comes only from an approved invitation for that email (threat S8).
 

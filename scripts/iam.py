@@ -433,7 +433,11 @@ def _waiting_for_new_sas(step: Callable[[], Any], new_sa_emails: list[str],
             return step()
         except CloudError as e:
             missing = [m for m in new_sa_emails if m in str(e)]
-            if wait is None or e.status not in (400, 404) or not missing:
+            if e.status not in (400, 404) or not missing:
+                raise
+            if wait is None:
+                print(f"  {missing[0]} still isn't usable after {sum(NEW_SA_WAITS)}s. Wait a minute and "
+                      "rerun apply: it only does what is still missing.", file=sys.stderr)
                 raise
             print(f"  waiting {wait}s for Google to finish creating {missing[0]}", file=sys.stderr)
             sleep(wait)
