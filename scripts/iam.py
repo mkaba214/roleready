@@ -28,10 +28,11 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Callable, Iterable
 
 import requests
 import yaml
@@ -419,8 +420,29 @@ def merged_policy(rp: ResourcePlan) -> dict[str, Any]:
     return policy
 
 
-def apply_plan(cloud: Cloud, spec: dict[str, Any], plan: Plan) -> list[str]:
+# A service account Google just created can take up to a minute to be usable in IAM policies
+# ("HTTP 400: Service account ... does not exist"). Wait and retry, but only for accounts this
+# apply created: an existing account that "does not exist" is a real error and fails at once.
+NEW_SA_WAITS = (5, 10, 15, 30, 30)  # seconds, 90 in all
+
+
+def _waiting_for_new_sas(step: Callable[[], Any], new_sa_emails: list[str],
+                         sleep: Callable[[float], Any]) -> Any:
+    for wait in (*NEW_SA_WAITS, None):
+        try:
+            return step()
+        except CloudError as e:
+            missing = [m for m in new_sa_emails if m in str(e)]
+            if wait is None or e.status not in (400, 404) or not missing:
+                raise
+            print(f"  waiting {wait}s for Google to finish creating {missing[0]}", file=sys.stderr)
+            sleep(wait)
+
+
+def apply_plan(cloud: Cloud, spec: dict[str, Any], plan: Plan, *,
+               sleep: Callable[[float], Any] = time.sleep) -> list[str]:
     done: list[str] = []
+    new_sa_emails = [cloud.sa_email(sa) for sa in plan.create_sas]
     sa_info = spec.get("service_accounts") or {}
     for sa in plan.create_sas:
         display = (sa_info.get(sa) or {}).get("display_name") or f"Stand-in for teammate {sa[7:]} (Floci only)"
@@ -437,8 +459,10 @@ def apply_plan(cloud: Cloud, spec: dict[str, Any], plan: Plan) -> list[str]:
         if not rp.add and not rp.missing_audit_logs:
             continue
         if rp.kind in ("secret", "sa") and (rp.resource in plan.missing_secrets or rp.resource in plan.create_sas):
-            rp.policy = cloud.get_policy(rp.kind, rp.resource)  # created just now; fetch its etag
-        cloud.set_policy(rp.kind, rp.resource, merged_policy(rp))
+            rp.policy = _waiting_for_new_sas(  # created just now; fetch its etag
+                lambda: cloud.get_policy(rp.kind, rp.resource), new_sa_emails, sleep)
+        policy = merged_policy(rp)
+        _waiting_for_new_sas(lambda: cloud.set_policy(rp.kind, rp.resource, policy), new_sa_emails, sleep)
         for role, member, cond in rp.add:
             done.append(f"{rp.kind}:{rp.resource or cloud.project} + {role} -> {member}"
                         + (f" (until {cond['expression'].split(chr(39))[1]})" if cond else ""))

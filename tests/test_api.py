@@ -219,6 +219,51 @@ def test_firebase_sign_in_with_unverified_email_is_refused(monkeypatch, verified
     assert r.status_code == 401
 
 
+GOOGLE = {"sign_in_provider": "google.com", "identities": {"google.com": ["1234"], "email": [SAM]}}
+
+
+def test_google_sign_in_with_verified_email_works(monkeypatch) -> None:
+    # "Sign in with Google" gives a Firebase ID token like any other: same check, same user.
+    c = _firebase_client(monkeypatch, {"email": SAM, "uid": "u-sam", "email_verified": True, "firebase": GOOGLE})
+    r = c.get("/me", headers={"Authorization": "Bearer t"})
+    assert r.status_code == 200, r.text
+    assert r.json()["email"] == SAM
+
+
+def test_google_sign_in_gets_no_special_pass_on_verification(monkeypatch) -> None:
+    # The S5 check is about the email, not the provider. A Google token without a verified
+    # email is refused like any other.
+    c = _firebase_client(monkeypatch, {"email": SAM, "uid": "u-x", "email_verified": False, "firebase": GOOGLE})
+    assert c.get("/me", headers={"Authorization": "Bearer t"}).status_code == 401
+
+
+def _config(**kw) -> dict:
+    from app.main import create_app
+    from app.store import MemoryStore
+
+    base = {"auth_mode": "firebase", "firebase_api_key": "web-key", "firebase_project_id": "p"}
+    return TestClient(create_app(Settings(**{**base, **kw}), store=MemoryStore())).get("/config").json()
+
+
+def test_google_button_is_off_until_turned_on() -> None:
+    # The Google provider must be enabled in Firebase first, or the button only shows an error.
+    assert _config()["google_sign_in"] is False
+    assert _config(firebase_google_sign_in=True)["google_sign_in"] is True
+
+
+def test_google_button_never_shows_in_demo_mode_or_on_floci() -> None:
+    assert _config(auth_mode="demo", firebase_google_sign_in=True)["google_sign_in"] is False
+    # Floci's Firebase Auth emulator has no Google popup.
+    assert _config(firebase_google_sign_in=True, firebase_auth_emulator_host="localhost:4588")["google_sign_in"] is False
+
+
+def test_google_sign_in_setting_reads_from_env(monkeypatch) -> None:
+    monkeypatch.setenv("FIREBASE_GOOGLE_SIGN_IN", "true")
+    assert Settings.from_env().firebase_google_sign_in is True
+    monkeypatch.delenv("FIREBASE_GOOGLE_SIGN_IN")
+    assert Settings.from_env().firebase_google_sign_in is False
+
+
 def test_dev_expiry_route_only_in_demo(app_factory) -> None:
     from app.main import create_app
     from app.store import MemoryStore
