@@ -63,6 +63,7 @@ project_bindings:
       - roles/iam.securityReviewer
       - roles/logging.privateLogViewer
       - roles/firebaseauth.admin             # Firebase Auth, invite sign-in (D7, issue #10)
+      - roles/serviceusage.serviceUsageConsumer  # quota project for local ADC, so scripts/firebase_user.py can call Identity Toolkit
   - member: person:joclyn
     roles:
       - roles/bigquery.user
