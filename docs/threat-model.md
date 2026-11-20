@@ -54,6 +54,13 @@ The integration is off unless `INTEGRATION_API_KEY` is set, and the MVP doesn't 
 | R3 | Repudiation | The expiry job runs twice (Scheduler retry), so metrics count one expiry twice | Job is idempotent; each grant gets exactly one `grant.expired` event (`<grant id>:expired`) | `test_ten_runs_write_one_expired_event_per_grant`, `test_fixed_event_id_is_written_once` |
 | D4 | Denial of service | Cloud Scheduler is down, so the expiry job never runs | Not a security failure: access ends on the second from the clock check (E3); the job only tidies status | `test_access_ends_on_the_second_even_if_job_never_runs` |
 
+### Added Nov 20 (Sign in with Google; owner Andrew)
+
+| # | Threat | Example | Control | Test |
+| --- | --- | --- | --- | --- |
+| S8 | Spoofing | Someone with any Google account clicks "Sign in with Google" to get in, or to claim sam@freelance.test before Sam does | Same server check as every sign-in: Firebase verifies the ID token and `email_verified` must be `true` (no exception for Google). Google proves the person owns the address, so S5 still holds. Signing in grants nothing: access comes only from an owner-approved invitation for that email, so a stranger's Google account is denied by default. The button shows only when `FIREBASE_GOOGLE_SIGN_IN=true` and never on the emulator; Firebase only opens the popup from its Authorized domains list | `test_google_sign_in_with_verified_email_works`, `test_google_sign_in_gets_no_special_pass_on_verification`, `test_google_button_is_off_until_turned_on` |
+| S9 | Spoofing | The owner's Google account is phished, so the attacker signs in as the owner | Same risk as a stolen password, but Google adds 2-Step Verification and suspicious-sign-in checks the app doesn't have. Owners should turn on 2-Step Verification. Every owner action is in the audit chain, and revoke still works | none (outside the app) |
+
 ## Open items
 
 - [x] S5: Firebase ID tokens whose `email_verified` isn't true are refused (#21). Seeded and admin-created accounts are marked verified; freelancers get a password-setup link from `scripts/firebase_user.py`, not self sign-up

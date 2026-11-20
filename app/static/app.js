@@ -100,6 +100,15 @@
         box.append(email, pw, h("button", { onclick: async () => {
           try { await state.firebase.auth().signInWithEmailAndPassword(email.value, pw.value); } catch (e) { toast(e.message); }
         } }, "Sign in"));
+        if (state.config.google_sign_in) {
+          // Popup, not redirect: redirects break when the app and authDomain are on different sites.
+          box.append(h("button", { class: "ghost", onclick: async () => {
+            const google = new state.firebase.auth.GoogleAuthProvider();
+            google.setCustomParameters({ prompt: "select_account" });
+            try { await state.firebase.auth().signInWithPopup(google); }
+            catch (e) { if (e.code !== "auth/popup-closed-by-user" && e.code !== "auth/cancelled-popup-request") toast(e.message); }
+          } }, "Sign in with Google"));
+        }
       }
     } else {
       box.append(h("span", { class: "muted" }, "Firebase sign-in is not configured"));

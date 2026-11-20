@@ -97,6 +97,8 @@ python scripts/firebase_user.py --project $PROJECT_ID add owner@yourdomain.test 
 
 Sign-in only accepts verified emails (threat S5), so create each account with `scripts/firebase_user.py` before sending the invite link. It prints a password-setup link; send it to that same email address.
 
+Optional, **Sign in with Google** next to email and password: in the Firebase console, turn on Authentication > Sign-in method > Google, and add the Cloud Run hostname under Authentication > Settings > Authorized domains. Then deploy with `FIREBASE_GOOGLE_SIGN_IN=true`. It works for Gmail and Google Workspace addresses; anyone else uses the password-setup link. Signing in grants nothing by itself: access still comes only from an approved invitation for that email (threat S8).
+
 Set a $10 budget alert in Billing, Budgets & alerts. IAM details: [docs/iam-runbook.md](docs/iam-runbook.md).
 
 Dashboard data: `pip install -r requirements-scripts.txt && python scripts/export_bigquery.py --project $PROJECT_ID` (add `--emulator http://localhost:4588` to practice on Floci), then build Looker Studio charts from [scripts/metrics.sql](scripts/metrics.sql).

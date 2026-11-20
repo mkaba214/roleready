@@ -35,6 +35,7 @@ class Settings:
     firebase_project_id: str = ""
     firebase_api_key: str = ""  # public web config, not a secret
     firebase_auth_domain: str = ""
+    firebase_google_sign_in: bool = False  # show "Sign in with Google"; turn on the provider in Firebase first
     firebase_auth_emulator_host: str = ""  # local Floci only, e.g. localhost:4588
 
     gcp_project: str = ""  # GOOGLE_CLOUD_PROJECT (floci-local when using Floci)
@@ -73,6 +74,7 @@ class Settings:
             firebase_project_id=e("FIREBASE_PROJECT_ID", e("GOOGLE_CLOUD_PROJECT", "")).strip(),
             firebase_api_key=e("FIREBASE_API_KEY", "").strip(),
             firebase_auth_domain=e("FIREBASE_AUTH_DOMAIN", "").strip(),
+            firebase_google_sign_in=_bool("FIREBASE_GOOGLE_SIGN_IN"),
             firebase_auth_emulator_host=e("FIREBASE_AUTH_EMULATOR_HOST", "").strip(),
             gcp_project=e("GOOGLE_CLOUD_PROJECT", "").strip(),
             integration_api_key=e("INTEGRATION_API_KEY", "").strip(),
