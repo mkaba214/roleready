@@ -48,7 +48,7 @@ If the person for a step isn't around, the project Owner can do it (break-glass)
    gcloud secrets versions disable OLD_VERSION_NUMBER --secret nvidia-api-key --project "$PROJECT_ID"
    ```
 
-   Disable, don't destroy, so the evidence stays until the review in step 6 is done.
+   Disable, don't destroy, so the evidence stays until the log check (step 5) and the write-up (step 7) are done.
 
 5. **Check who read the secret** (Andrew). `scripts/iam.py apply` turns on Data Access logs for Secret Manager. In Logs Explorer, set the time range to start before the leak:
 
