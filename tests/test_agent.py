@@ -116,10 +116,64 @@ def test_named_zone_keeps_times_that_are_already_unambiguous() -> None:
 
 
 def test_local_times_take_the_named_zone_offset() -> None:
-    result, _ = draft([{**GOOD, "timezone": "America/Denver", "start_at": "2026-11-09T09:00", "expires_at": "2026-11-10T17:00"}])
+    reply = {**GOOD, "timezone": "America/Denver", "start_at": "2026-11-09T09:00", "expires_at": "2026-11-10T17:00"}
+    result, _ = draft([reply], text="Give sam@freelance.test editing Mon 9am to Tue 5pm MT")
     assert result.ok, result.errors
     assert result.draft["start_at"] == "2026-11-09T09:00:00-07:00"
     assert result.draft["expires_at"] == "2026-11-10T17:00:00-07:00"
+
+
+@pytest.mark.parametrize(
+    "text, guess",
+    [
+        ("Give riley@client.test view access to analytics for the Pacific Coast pop-up, Nov 9 10am to 2pm.",
+         "America/Los_Angeles"),  # regression r01
+        ("Give sam@freelance.test editing for the Mountain View store launch Monday 10am to Tuesday 2pm",
+         "America/Denver"),
+        ("Give sam@freelance.test editing for the Denver office launch Monday 10am to Tuesday 2pm", "America/Denver"),
+        ("Give sam@freelance.test editing Monday 10am to Tuesday 2pm", "America/New_York"),
+    ],
+)
+@pytest.mark.parametrize(
+    "start, end",
+    [("2026-11-09T10:00", "2026-11-10T14:00"), ("2026-11-09T10:00:00-08:00", "2026-11-10T14:00:00-08:00")],
+)
+def test_model_zone_the_request_never_mentions_is_dropped(text, guess, start, end) -> None:
+    """Issue #29: for "Pacific Coast pop-up" the model itself chose Los Angeles, moving 10am to noon Chicago time.
+    A zone the request never mentions is a guess: keep the workspace zone and the clock times the owner typed."""
+    result, _ = draft([{**GOOD, "timezone": guess, "start_at": start, "expires_at": end}], text=text)
+    assert result.ok, result.errors
+    assert result.draft["timezone"] == "America/Chicago"
+    assert result.draft["start_at"] == "2026-11-09T10:00:00-06:00"
+    assert result.draft["expires_at"] == "2026-11-10T14:00:00-06:00"
+
+
+@pytest.mark.parametrize(
+    "words, zone, offset",
+    [
+        ("9am to 5pm PST", "America/Los_Angeles", "-08:00"),
+        ("9am to 5pm ET", "America/New_York", "-05:00"),
+        ("9am to 5pm America/Denver", "America/Denver", "-07:00"),
+        ("9am to 5pm London time", "Europe/London", "+00:00"),
+        ("9am to 5pm New York time", "America/New_York", "-05:00"),
+        ("9am to 5pm UTC", "UTC", "+00:00"),
+    ],
+)
+def test_model_zone_the_request_mentions_is_kept(words, zone, offset) -> None:
+    """Issue #29: abbreviations, IANA names and "<city> time" are real zones, so the model's matching choice stays."""
+    reply = {**GOOD, "timezone": zone, "start_at": "2026-11-09T09:00", "expires_at": "2026-11-09T17:00"}
+    result, _ = draft([reply], text=f"Give sam@freelance.test editing on Monday {words}")
+    assert result.ok, result.errors
+    assert result.draft["timezone"] == zone
+    assert result.draft["start_at"] == f"2026-11-09T09:00:00{offset}"
+
+
+def test_zone_mentioned_only_inside_a_name_does_not_back_the_guess() -> None:
+    """"Denver office" or "London store" is a place, not a zone. Only "<city> time" counts."""
+    reply = {**GOOD, "timezone": "Europe/London", "start_at": "2026-11-09T09:00", "expires_at": "2026-11-09T17:00"}
+    result, _ = draft([reply], text="Give sam@freelance.test editing for the London store opening, Monday 9am to 5pm")
+    assert result.ok, result.errors
+    assert result.draft["timezone"] == "America/Chicago"
 
 
 def test_prompt_rules_for_durations_and_missing_end() -> None:

@@ -50,6 +50,7 @@ Windows 11, Python 3.12.10, `AUTH_MODE=demo`, `STORE_BACKEND=memory`, personal N
 | Nov 10 | nvidia/nemotron-3.5-lightning-30b-a3b | 21/30 (target 27) | 70% | 1702 ms | First run with reasoning off (#4). Misses: weekday names resolved to past dates, invented end dates, wrong zone offsets |
 | Nov 10 | nvidia/nemotron-3.5-lightning-30b-a3b | 28/30 (target 27) | 93% | 1265 ms | After the prompt calendar, date and task rules and the named-zone check (#7). Same score on two runs. Misses e01 and e14: the end of a weekday range lands one day late |
 | Nov 18 | nvidia/nemotron-3.5-lightning-30b-a3b | 28/30 (target 27) | 93% | 640 ms | First full run since #15 (zone words only next to a time), on this branch with the #19 fix (#20). No regression: all 28 earlier passes still pass. Still misses e01 and e14 (end of a weekday range one day late) |
+| Nov 19 | nvidia/nemotron-3.5-lightning-30b-a3b | 28/30 (target 27) | 93% | 601 ms | With the #29 fix (a zone the request never mentions is dropped). No regression, including e08, e15, e22, e25 and e30, which name a zone. Same e01 and e14 misses |
 
 Other models tried on Andrew's key, Nov 10: `nvidia/nemotron-3-super-120b-a12b` returns HTTP 404. `nvidia/llama-3.3-nemotron-super-49b-v1.5` and `meta/llama-3.3-70b-instruct` return HTTP 410 (retired). Lightning was the only one of these that answered.
 
@@ -71,6 +72,7 @@ Run: `python -m evals.run_eval --set regression`. Cases live in `evals/regressio
 | Nov 17, 2026 | Before fix (#15 not merged) | nvidia/nemotron-3.5-lightning-30b-a3b | 0/2 | FAIL | FAIL | Third run, "Nov 9" wording (current cases). #13 only, see cause analysis |
 | Nov 18, 2026 | After #15, before #20 | nvidia/nemotron-3.5-lightning-30b-a3b | crashed | crash | not run | The model answered `"timezone": "Pacific"` for r01 and the app crashed. Filed as #19, fixed in #20 |
 | Nov 19, 2026 | After fix (#15 and #20 merged) | nvidia/nemotron-3.5-lightning-30b-a3b | 1/2 | FAIL | PASS | r02 fixed. r01 still +2 h, but now because the model itself picked Los Angeles (see cause analysis) |
+| Nov 19, 2026 | With the #29 fix (this branch) | nvidia/nemotron-3.5-lightning-30b-a3b | 2/2 | PASS | PASS | The app drops a zone the request never mentions. r01 then ran 15 more times: the model answered `Pacific` 14 times (handled by #20) and `America/Los_Angeles` once (handled by #29); the draft was 10am-2pm Chicago time every time |
 
 **Note on the original r02 wording (first run).** r02 first read "...from Monday 9am to Wednesday 5pm." Its end landed on Thu Nov 12, 6:00 PM Chicago time instead of Wed 5:00 PM: +1 h from #13 (Denver), plus +24 h from the known weekday-range issue (e01/e14), where the model picked Thursday for "Wednesday". Mixing two bugs meant r02 would still fail after #15, so it now uses a single-day window and tests #13 only. In the same run, r01 was off by +2 h on both times (`10:00-08:00`, `14:00-08:00`, read as Los Angeles time), which is #13 only.
 
@@ -105,6 +107,8 @@ Both cases land on the right day with the right clock times. Only the zone is wr
 | r02 | both | Mon Nov 9, 9:00 AM-5:00 PM | Same (`-06:00`, `America/Chicago`) | 0 | Pass |
 
 #15 fixed the app's part of #13: the app no longer switches zones because a name contains "Pacific" or "Mountain", and r02 now passes. r01 shows a second source of the same bug. The model reads "Pacific Coast" as a zone hint and returns a valid zone itself (`America/Los_Angeles` here, `Pacific` in the Nov 18 run that crashed). The app accepts any valid zone the model returns, so the +2 h shift survives. A possible fix is for the app to keep the workspace zone unless the owner's request names a zone next to a time, which is the same rule #15 applies to the app's own check. The owner still sees the zone and must approve, so no access is granted in the wrong window without the owner seeing it.
+
+**Fix (#29, Nov 19).** The app now keeps the model's zone only when the request mentions it: its IANA name ("America/Denver"), its city followed by "time" ("London time"), or an abbreviation ("PST", "ET"). Any other zone is a guess, so the draft uses the workspace zone and keeps the clock times the owner typed. A zone word next to a time ("5pm Pacific") still wins, as in #15. With the fix, r01 is 10am-2pm Chicago time whether the model answers `Pacific`, `America/Los_Angeles` or `America/Chicago`.
 
 ## Live reliability checks (Week 3)
 

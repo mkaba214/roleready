@@ -99,6 +99,12 @@ def get_current_user(request: Request, settings: Settings = Depends(get_settings
     email = str(claims.get("email", "")).lower()
     if not email:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "token has no email claim")
+    # S5: the public web API key lets anyone sign up with any email, so an email only counts once
+    # Firebase has verified it. Google sign-in is always verified; seeded and admin-created
+    # accounts are marked verified (scripts/floci_seed.py, scripts/firebase_user.py).
+    if claims.get("email_verified") is not True:
+        log.warning("firebase token refused: email not verified")
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "email address is not verified")
     return User(email=email, uid=str(claims.get("uid") or claims.get("sub")))
 
 
