@@ -6,7 +6,7 @@ Feedback the team received, and what changed because of it. Four sources: the us
 
 **What:** a Google Form with problem questions (Part 1) and a screenshot-based section (Part 2). Part 2 shows three tasks from the owner's journey: invite a freelancer for this week, see what the freelancer did, and remove the freelancer's access now. For each, respondents say what they would click and rate how easy it looks (1-5). A final question rates how useful RoleReady would be (1-5).
 **Why screenshots:** outside people don't use the app hands-on (D8).
-**Shared:** on LinkedIn, the #mmc-build Slack, and through teammates.
+**Shared:** on LinkedIn, the #mmc-build Slack, and through teammates. First response Nov 16.
 **Responses:** 5 as of Nov 20 (Nov 16-19). Collection stays open until Nov 23. No names or contact details were collected.
 
 | Respondent | Type (owner / freelancer / other) | What they said | Theme | Effect on RoleReady |
