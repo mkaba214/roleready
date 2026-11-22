@@ -12,7 +12,11 @@ Re-plan after apply shows 1 change: the `roleready-integration-key` accessor bin
 
 - `permission-denied-nvidia-key.png` (Nov 20): Joclyn, signed in with her own account, runs `gcloud secrets versions access latest --secret=nvidia-api-key --project=roleready-515202` and gets `PERMISSION_DENIED` (`secretmanager.versions.access`, `IAM_PERMISSION_DENIED`). A team member with project access still can't read the key. Her email is blacked out.
 
-Still to capture: the `troubleshoot-policy` check (see `docs/iam-runbook.md` Phase 2 step 3).
+- `troubleshoot-nvidia-api-key.json` (Nov 20): Policy Troubleshooter for Joclyn and `secretmanager.versions.access` on `nvidia-api-key`: `CANNOT_ACCESS`. Neither the secret's policy nor the project's grants it, and no deny policy is involved. Trimmed to the verdicts, emails and the project number redacted. This was the last Phase 2 step 3 item.
+
+## `serviceUsageConsumer` for Andrew, PR #39 (Nov 20)
+
+- `iam-apply-2026-11-20.txt`: plan, apply, re-plan. One grant added, time-boxed to Dec 1. The re-plan shows the same two known leftovers as Nov 19 (integration-key binding, Editor on the default SA). The new grant took about 12 minutes to start working (`USER_PROJECT_DENIED` until then).
 
 ## Dashboard
 

@@ -213,7 +213,18 @@ def test_apply_gives_up_if_a_new_service_account_never_appears(spec) -> None:
     assert 0 < len(waits) <= 6 and sum(waits) <= 120
 
 
-def test_apply_does_not_retry_for_a_service_account_it_did_not_create(spec) -> None:
+def test_giving_up_on_a_new_service_account_says_to_rerun(spec, capsys) -> None:
+    # Mohamed's #37 review: on a fresh project, say what to do next instead of only the 400.
+    fake = FakeGoogle()
+    _gcp_ready(fake)
+    fake.not_visible_yet = {"roleready-run": 99}
+    with pytest.raises(CloudError):
+        apply_plan(gcp(fake), spec, make_plan(gcp(fake), spec, TEAM), sleep=lambda s: None)
+    err = capsys.readouterr().err
+    assert "still isn't usable" in err and "rerun" in err.lower()
+
+
+def test_apply_does_not_retry_for_a_service_account_it_did_not_create(spec, capsys) -> None:
     # An existing account that "does not exist" is a real error (typo, deleted): fail at once.
     fake = FakeGoogle()
     _gcp_ready(fake)
@@ -223,6 +234,7 @@ def test_apply_does_not_retry_for_a_service_account_it_did_not_create(spec) -> N
     with pytest.raises(CloudError, match="400"):
         apply_plan(gcp(fake), spec, make_plan(gcp(fake), spec, TEAM), sleep=waits.append)
     assert waits == []
+    assert "rerun" not in capsys.readouterr().err.lower()
 
 
 def test_concurrent_edit_fails_instead_of_overwriting(spec) -> None:
