@@ -20,7 +20,7 @@
 - No code change. The chain stays whole and `verify_chain()` keeps checking from the first event.
 - Keep Google's log defaults: 400 days for Admin Activity, 30 days for Data Access. 30 days covers the leaked-key check in `docs/incident-nvidia-key.md` for the life of the capstone. Longer retention in `_Default` costs money.
 
-**2. When the program ends: delete the project.** All teammate grants end on Dec 1 (time-boxed in `iam.yaml`). After grading, Mohamed deletes `roleready-515202`, around **Dec 31** once grading is confirmed. That removes Firestore, BigQuery and the logs together. Google keeps a deleted project recoverable for 30 days, then it's gone. Before deleting, export the evidence we want to keep (already in `docs/evidence/`, no emails). Since the deploy, the Data Studio dashboard reads `roleready-515202`'s BigQuery (D4), so it works until the project is deleted after grading; the screenshots in `docs/evidence/` are the lasting record.
+**2. When the program ends: delete the project.** All teammate grants end on Dec 1 (time-boxed in `iam.yaml`). After grading, Mohamed deletes `roleready-515202`, around **Dec 31** once grading is confirmed. That removes Firestore, BigQuery and the logs together. Google keeps a deleted project recoverable for 30 days, then it's gone. Before deleting, export the evidence we want to keep (already in `docs/evidence/`, no emails). After the deploy, the Data Studio dashboard switches to `roleready-515202`'s BigQuery (D4), so it works until the project is deleted after grading; the screenshots in `docs/evidence/` are the lasting record.
 
 **3. For a real product (documented, not built).**
 - Keep 1 year of events per workspace in Firestore, then move older events to a Cloud Storage bucket with a locked retention policy, so nobody can edit or delete the archive early.
@@ -31,7 +31,7 @@
 ## Team answers
 
 1. OK to keep every event for the capstone, with no deletion (point 1)? **Joclyn: yes (Nov 20).**
-2. Mohamed: OK to delete `roleready-515202` after grading, and when (point 2)? **Mohamed: yes (Nov 20), around Dec 31, once grading is confirmed.** The dashboard on `roleready-515202`'s BigQuery keeps working until then (D4).
+2. Mohamed: OK to delete `roleready-515202` after grading, and when (point 2)? **Mohamed: yes (Nov 20), around Dec 31, once grading is confirmed.** The dashboard on `roleready-515202`'s BigQuery will keep working until then (D4).
 3. Joclyn: does the dashboard need anything older than the current export? **No (Nov 20): only the current export.**
 
 ## Done
