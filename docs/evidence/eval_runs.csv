@@ -1,0 +1,9 @@
+run_order,run_label,run_date,eval_set,passed,total,accuracy,target_passed,median_latency_ms,status,note
+1,Nov 10 (1st),2026-11-10,brief_30,21,30,0.70,27,1702,scored,First working run with reasoning off (#4)
+2,Nov 10 (2nd),2026-11-10,brief_30,28,30,0.93,27,1265,scored,Prompt fixes (#7). Misses e01 and e14 (weekday range end one day late)
+3,Nov 18,2026-11-18,brief_30,28,30,0.93,27,640,scored,After the zone fix (#15) and crash fix (#20). Same e01 and e14 misses
+4,Nov 19,2026-11-19,brief_30,28,30,0.93,27,601,scored,After #30 (zone the request never mentions is dropped). Same e01 and e14 misses
+1,Nov 17,2026-11-17,regression,0,2,0.00,2,1115,scored,Before the fix (#13 baseline)
+2,Nov 18,2026-11-18,regression,,2,,2,,crashed,"Model answered ""Pacific"" and the app crashed (#19, fixed in #20)"
+3,Nov 19 (1st),2026-11-19,regression,1,2,0.50,2,1246,scored,After #15 and #20. r01 still wrong: the model picked Los Angeles (#29)
+4,Nov 19 (2nd),2026-11-19,regression,2,2,1.00,2,,scored,After #30

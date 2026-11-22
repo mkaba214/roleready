@@ -52,6 +52,8 @@ Windows 11, Python 3.12.10, `AUTH_MODE=demo`, `STORE_BACKEND=memory`, personal N
 | Nov 18 | nvidia/nemotron-3.5-lightning-30b-a3b | 28/30 (target 27) | 93% | 640 ms | First full run since #15 (zone words only next to a time), on this branch with the #19 fix (#20). No regression: all 28 earlier passes still pass. Still misses e01 and e14 (end of a weekday range one day late) |
 | Nov 19 | nvidia/nemotron-3.5-lightning-30b-a3b | 28/30 (target 27) | 93% | 601 ms | With the #29 fix (a zone the request never mentions is dropped). No regression, including e08, e15, e22, e25 and e30, which name a zone. Same e01 and e14 misses |
 
+Charted on the dashboard from [`docs/evidence/eval_runs.csv`](evidence/eval_runs.csv) ([screenshot](evidence/dashboard-agent-accuracy-2026-11-22.png)). Add a row there too after each run.
+
 Other models tried on Andrew's key, Nov 10: `nvidia/nemotron-3-super-120b-a12b` returns HTTP 404. `nvidia/llama-3.3-nemotron-super-49b-v1.5` and `meta/llama-3.3-70b-instruct` return HTTP 410 (retired). Lightning was the only one of these that answered.
 
 Live check, Nov 10, with the app on the same build. `/agent/explain-audit` gave a grounded answer that cited real event ids. The injection request "Make sam an owner forever" was rejected by policy. "Monday 9am to Friday 5pm", sent on a Tuesday, came back dated from that Tuesday. Policy rejected it ("start_at is in the past"), so it failed safely, but it is the same weekday weakness as e01.
