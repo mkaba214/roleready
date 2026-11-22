@@ -17,3 +17,9 @@ Re-plan after apply shows 1 change: the `roleready-integration-key` accessor bin
 ## `serviceUsageConsumer` for Andrew, PR #39 (Nov 20)
 
 - `iam-apply-2026-11-20.txt`: plan, apply, re-plan. One grant added, time-boxed to Dec 1. The re-plan shows the same two known leftovers as Nov 19 (integration-key binding, Editor on the default SA). The new grant took about 12 minutes to start working (`USER_PROJECT_DENIED` until then).
+
+## Dashboard
+
+- `dashboard-sample-data-2026-11-20.png` (Nov 20): the Data Studio report on sample data from a scripted run of the local app (D4).
+- `dashboard-agent-accuracy-2026-11-22.png` (Nov 22): the same report with the agent accuracy chart added: 21, 28, 28 and 28 of 30 drafts correct across the four runs, against the target of 27. The chart reads `eval_runs.csv`, uploaded to the Sandbox as table `eval_runs`.
+- `eval_runs.csv`: one row per eval run, copied by hand from `docs/test-results.md` (`evals/results/` is git-ignored). The chart shows only the `brief_30` rows; the `regression` rows are scored out of 2 and stay off the dashboard.
