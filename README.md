@@ -12,10 +12,10 @@ Product brief: [docs/product-brief.md](docs/product-brief.md) · Open decisions:
 | Measure | Target | Result |
 | --- | --- | --- |
 | Actions after access ended | 0 | 0 |
-| Decisions in the audit log | 100% | 187 of 187 on the sample journey; on the live app, an independent recheck agrees with all 10 logged decisions |
+| Decisions in the audit log | 100% | 187 of 187 on the sample journey ([screenshot](docs/evidence/dashboard-sample-data-2026-11-20.png)); on the live app, an independent recheck agrees with all 10 logged decisions |
 | Duplicate expiry events | 0 | 0 |
 | Grants without owner approval | 0 | 0 |
-| Agent drafts correct | 27 of 30 | 28 of 30 (three runs, Nov 10-19) |
+| Agent drafts correct | 27 of 30 | 28 of 30 on every run since the Nov 10 prompt fixes (4 runs, Nov 10-19; [test results](docs/test-results.md)) |
 | Time to invite a freelancer | Under 2 min | 45 s (one internal run, local app) |
 
 275 automated tests pass. Survey: 6 responses, usefulness 4.2 of 5. Details: [test results](docs/test-results.md), [feedback log](docs/feedback-log.md), [evidence](docs/evidence/).
