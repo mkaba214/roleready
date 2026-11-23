@@ -1,7 +1,8 @@
 -- Dashboard views and the decision recheck for the Data Studio report (Joclyn).
 -- Replace PROJECT with your project id. All of it reads `PROJECT.roleready.audit_events`,
 -- which scripts/export_bigquery.py fills (one row per audit event; `details` is JSON text).
--- Screenshot: docs/evidence/dashboard-agent-accuracy-2026-11-22.png
+-- Screenshots: docs/evidence/dashboard-agent-accuracy-2026-11-22.png (sample data),
+-- docs/evidence/dashboard-live-2026-11-22.png (live data, after the switch on Nov 22).
 --
 -- Switching the report from the Sandbox (sample data) to roleready-515202 (D4):
 --   1. Run scripts/export_bigquery.py --project roleready-515202 after real activity on the live app.
@@ -12,6 +13,8 @@
 --   4. Refresh data, rerun the decision recheck (expect 0 disagreements), and
 --      replace the "Sample data" note at the top of the report.
 --   5. Take a new screenshot for docs/evidence/.
+-- To refresh later: rerun step 1, then Refresh data in Data Studio. Rerun the views only
+-- after this file changes.
 
 
 -- ===== Dashboard views =====
@@ -28,10 +31,12 @@ SELECT id, seq, ts, workspace_id, actor, action, target, decision, reason,
     WHEN 'role_forbids_task' THEN "Role doesn't allow this task"
     WHEN 'no_grant' THEN 'Never given access'
     WHEN 'task_not_granted' THEN 'Task not in their grant'
+    WHEN 'unknown_task' THEN 'Not a RoleReady task'
+    WHEN 'inactive' THEN 'Access not active'
     ELSE reason END AS reason_label,
   CASE
     WHEN reason IN ('expired', 'revoked') THEN 'Access ended'
-    WHEN reason IN ('not_started', 'no_grant', 'role_forbids_task', 'task_not_granted') THEN 'Outside granted access'
+    WHEN reason IN ('not_started', 'no_grant', 'role_forbids_task', 'task_not_granted', 'unknown_task', 'inactive') THEN 'Outside granted access'
     WHEN reason = 'ok' THEN 'Allowed' END AS block_group,
   CASE action
     WHEN 'action.view_assets' THEN 'View assets'
