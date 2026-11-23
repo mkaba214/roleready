@@ -7,7 +7,7 @@ Feedback the team received, and what changed because of it. Four sources: the us
 **What:** a Google Form with problem questions (Part 1) and a screenshot-based section (Part 2). Part 2 shows three tasks from the owner's journey: invite a freelancer for this week, see what the freelancer did, and remove the freelancer's access now. For each, respondents say what they would click and rate how easy it looks (1-5). A final question rates how useful RoleReady would be (1-5).
 **Why screenshots:** outside people don't use the app hands-on (D8).
 **Shared:** from Nov 10, on LinkedIn, the #mmc-build Slack, and through teammates. First response Nov 16.
-**Responses:** 5 as of Nov 20 (Nov 16-19). Collection stays open until Nov 23. No names or contact details were collected.
+**Responses:** 6, final (Nov 16-22). Closed Nov 23. No names or contact details were collected.
 
 | Respondent | Type (owner / freelancer / other) | What they said | Theme | Effect on RoleReady |
 | --- | --- | --- | --- | --- |
@@ -16,20 +16,22 @@ Feedback the team received, and what changed because of it. Four sources: the us
 | R3 | Freelancer | No access problems. Rated the tasks 5, 4, 5 and usefulness 4. No written answers to the tasks | | None |
 | R4 | Freelancer | Has waited for access to be unlocked, and has shared usernames and passwords. Access sometimes stays active after a project ends. Described the invite steps correctly. For Task 2, would look at the Action column "or see if I could ask the assistant". Rated the tasks 4, 3, 3 and usefulness 4. Wants to know "what I had access to and how long for" | The problem is real; the freelancer's view | Confirms the problem. The freelancer view already shows the access window; nothing changed |
 | R5 | Other (neither) | Unsure how to remove access ("not sure, revoke maybe?"). Rated the tasks 1, 1, 2 but usefulness 5. Wants "clear simple text" | Plain language | Check the screen labels for plain wording: issue #41, after submission |
+| R6 | Freelancer | Has had access difficulties (not described); access expires automatically where they work. The task answers describe Google Drive (Version History, Share settings), not the screenshots, so they don't count as finding the steps. Rated the tasks 3, 3, 3 and usefulness 5. Wants "automatic expiry dates, easy one-click access removal, and a clear view of who has temporary access" | The features match the need | Confirms the design: expiry, one-click revoke and the access view are what RoleReady does |
 
-**Summary of themes** (n = 5, so these are early signals, not results):
+**Summary of themes** (n = 6, so these are early signals, not results):
 
 | Question | Average (1-5) | Ratings |
 | --- | --- | --- |
-| Task 1: invite | 3.6 | 5, 3, 5, 4, 1 |
-| Task 2: see what they did | 3.2 | 5, 3, 4, 3, 1 |
-| Task 3: remove access | 3.6 | 5, 3, 5, 3, 2 |
-| How useful | 4.0 | 5, 2, 4, 4, 5 |
+| Task 1: invite | 3.5 | 5, 3, 5, 4, 1, 3 |
+| Task 2: see what they did | 3.2 | 5, 3, 4, 3, 1, 3 |
+| Task 3: remove access | 3.5 | 5, 3, 5, 3, 2, 3 |
+| How useful | 4.2 | 5, 2, 4, 4, 5, 5 |
 
-1. **The problem is real for some:** 2 of 5 say access sometimes stays active after a project ends, and 2 of 5 had trouble getting access. One shares usernames and passwords.
+1. **The problem is real for some:** 2 of 6 say access sometimes stays active after a project ends, and 3 of 6 have had difficulties with access. One shares usernames and passwords. 5 of 6 rated usefulness 4 or 5.
 2. **"See what they did" was the hardest task (3.2).** Respondents looked for the right columns ("actor", "action") but were less sure. One asked for filters by person and date.
-3. **Invite is clear; remove less so:** 3 of the 4 who answered Task 1 described the invite steps. For Task 3, 3 of the 4 who answered found the Revoke button, but 2 of them weren't sure ("assuming it is a button", "not sure, revoke maybe?").
+3. **Invite is clear; remove less so:** 3 of the 5 who answered Task 1 described the invite steps. For Task 3, 3 of the 5 who answered found the Revoke button, but 2 of them weren't sure ("assuming it is a button", "not sure, revoke maybe?").
 4. **Plain language:** the respondent who rated the tasks lowest still rated usefulness 5 and asked for "clear simple text".
+5. **What people want matches the design:** R6 asked for "automatic expiry dates, easy one-click access removal, and a clear view of who has temporary access".
 
 **Limits:** no respondent answered as only a small business owner, the person the screenshots show. Most respondents are freelancers. The brief sets no target for the ease ratings, so they are reported, not scored as pass or fail.
 
@@ -60,7 +62,7 @@ Feedback the team received, and what changed because of it. Four sources: the us
 
 The original plan called for five hands-on 30-minute sessions with first-time testers. On Nov 15 the team decided outside people would not use the app hands-on (D8). These are **internal runs by the team, not user sessions**. The team built the app, so times will be faster than a first-time user's.
 
-**Status:** agreed Nov 18: all three team members do one timed run, target under two minutes per invitation. Environment to be confirmed (local or deployed).
+**Status:** agreed Nov 18: all three team members do one timed run, target under two minutes per invitation. The deployed app has one owner account, so runs by anyone else use the local app in demo mode (same screens). Joclyn's run: Nov 23, local.
 
 **Script:**
 1. **Invite (timed):** as the owner, invite Sam for this week. Start when the invite form opens, stop when the invitation is approved.
@@ -72,6 +74,6 @@ Record the time for each timed task, anything that went wrong or was confusing, 
 
 | Date | Run | Type | Task | Time | What happened | Quote | Severity | Fix / issue link |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| | T1 | Team member (internal) | Invite | | | | | |
-| | T1 | Team member (internal) | Check | | | | | |
-| | T1 | Team member (internal) | Remove | | | | | |
+| Nov 23 | T1 (Joclyn, local app) | Team member (internal) | Invite | 45 s (target under 2 min: met) | Invited Sam to edit drafts this week and approved it. As Sam, the first pasted token was refused (`invalid_token`) and the second try worked; edit_drafts was allowed and manage_access was blocked (`role_forbids_task`) | "It's easy to do and straightforward, but I would like the actions to be easier to understand for a regular person." | Low | Plainer action labels: #41, after submission |
+| Nov 23 | T1 (Joclyn, local app) | Team member (internal) | Check | 15 s | Found both of Sam's actions in the audit history | (same) | Low | #41 |
+| Nov 23 | T1 (Joclyn, local app) | Team member (internal) | Remove | 27 s | Revoked Sam's access; as Sam, edit_drafts was then blocked (`revoked`). `GET /audit/verify`: chain intact, 8 of 8 events | (same) | None | None |
