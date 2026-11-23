@@ -4,6 +4,8 @@ Run: `pytest` (all suites) · `python -m evals.run_eval --model <id>` (agent qua
 
 ## Automated suites (Nov 5 baseline: 203 passing, 19 Floci tests skipped without Floci)
 
+**Nov 23:** `pytest` 275 passed, 18 skipped (the Floci IAM enforcement tests, which run in the `iam-floci` CI job). `python scripts/iam.py lint` clean.
+
 Added Nov 5: `tests/test_brief_updates.py` (time zones, success-measures dashboard, Newly integration, CORS), `tests/iam/test_iam_policy.py` (least-privilege lint), `tests/iam/test_iam_tool.py` (plan/apply logic), `tests/iam/test_floci_enforcement.py` (19 enforcement checks, run with `FLOCI_GCP_URL` set). The eval set grew to 30 cases.
 
 | Suite | File | What it proves | Cases |

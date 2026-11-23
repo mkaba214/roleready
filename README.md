@@ -3,9 +3,26 @@
 **Time-boxed, least-privilege access for small businesses that hire freelancers.**
 Team RoleReady · GCLP BUILD Capstone, Fall 2026 · UN SDG 9 (Industry, Innovation and Infrastructure)
 
-> Links (fill in before Nov 28): Live demo · Deck (8 slides) · Video (5 min) · Written summary (3 pages)
+> Links (fill in before Nov 28): [Live demo](https://roleready-340875597178.us-central1.run.app) · Deck (8 slides) · Video (5 min) · Written summary (3 pages)
 
 Product brief: [docs/product-brief.md](docs/product-brief.md) · Open decisions: [docs/decisions.md](docs/decisions.md)
+
+## Results
+
+| Measure | Target | Result |
+| --- | --- | --- |
+| Actions after access ended | 0 | 0 |
+| Decisions in the audit log | 100% | 187 of 187 on the sample journey; on the live app, an independent recheck agrees with all 10 logged decisions |
+| Duplicate expiry events | 0 | 0 |
+| Grants without owner approval | 0 | 0 |
+| Agent drafts correct | 27 of 30 | 28 of 30 (three runs, Nov 10-19) |
+| Time to invite a freelancer | Under 2 min | 45 s (one internal run, local app) |
+
+275 automated tests pass. Survey: 6 responses, usefulness 4.2 of 5. Details: [test results](docs/test-results.md), [feedback log](docs/feedback-log.md), [evidence](docs/evidence/).
+
+**Verified:** the measures above; a team member with project access gets `PERMISSION_DENIED` reading the NVIDIA key ([evidence](docs/evidence/README.md)); the audit chain check (sample and local runs).
+
+**Not claimed:** production readiness; results with real business owners (the survey reached mostly freelancers); the agent handling casual zone names like "LA time" (see [Known limitations](#known-limitations)).
 
 ## Audience and problem
 
@@ -68,9 +85,9 @@ Sign in with `owner@bloomandcrumb.test` and the password the seed script prints.
 ## Tests
 
 ```bash
-pytest                                          # 203 tests, no network needed
+pytest                                          # 275 tests, no network needed
 python scripts/iam.py lint                      # least-privilege rules for infra/iam/iam.yaml
-FLOCI_GCP_URL=http://localhost:4588 pytest tests/iam -v   # 19 IAM enforcement tests against Floci
+FLOCI_GCP_URL=http://localhost:4588 pytest tests/iam -v   # 18 IAM enforcement tests against Floci
 python -m evals.run_eval                        # 30-case agent eval, brief target 27 of 30 (needs NVIDIA_API_KEY)
 ```
 
@@ -139,7 +156,7 @@ docs/       brief, decisions, architecture, IAM runbook, threat model, test resu
 - The audit chain serializes writes through one Firestore document per workspace, fine for a small business, not for thousands of actions per second.
 - No email delivery. The owner copies the invite link.
 - Floci is a local test tool, not a security boundary. Real protection comes from the Google Cloud deploy.
-- Model drafts depend on the chosen NVIDIA model. Track accuracy with `evals/`.
+- Model drafts depend on the chosen NVIDIA model. Track accuracy with `evals/`. Casual zone names like "LA time" or "pst" fall back to the workspace zone (feedback log, Nov 19), and the end of a weekday range can land a day late (e01, e14); the owner reviews every draft before approving.
 - Audit events are kept for the life of the demo project; a real product would archive after a year with a chain checkpoint ([docs/audit-retention.md](docs/audit-retention.md)).
 
 ## Team and contributions
