@@ -4,7 +4,7 @@
   python -m poc.agent_poc
   python -m poc.agent_poc --model <another model id from build.nvidia.com>
 
-Writes poc/results.json. Copy the summary into docs/gauntlet-recap.md.
+Writes poc/results.json.
 """
 
 from __future__ import annotations
