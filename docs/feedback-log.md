@@ -62,7 +62,7 @@ Feedback the team received, and what changed because of it. Four sources: the us
 
 The original plan called for five hands-on 30-minute sessions with first-time testers. On Nov 15 the team decided outside people would not use the app hands-on (D8). These are **internal runs by the team, not user sessions**. The team built the app, so times will be faster than a first-time user's.
 
-**Status:** agreed Nov 18: all three team members do one timed run, target under two minutes per invitation. The deployed app has one owner account, so runs by anyone else use the local app in demo mode (same screens). Joclyn's run: Nov 23, local.
+**Status:** agreed Nov 18: all three team members do one timed run, target under two minutes per invitation. The deployed app has one owner account, so runs by anyone else use the local app in demo mode (same screens). Joclyn's run: Nov 23, local. Andrew's run: Nov 23, local.
 
 **Script:**
 1. **Invite (timed):** as the owner, invite Sam for this week. Start when the invite form opens, stop when the invitation is approved.
@@ -77,3 +77,6 @@ Record the time for each timed task, anything that went wrong or was confusing, 
 | Nov 23 | T1 (Joclyn, local app) | Team member (internal) | Invite | 45 s (target under 2 min: met) | Invited Sam to edit drafts this week and approved it. As Sam, the first pasted token was refused (`invalid_token`) and the second try worked; edit_drafts was allowed and manage_access was blocked (`role_forbids_task`) | "It's easy to do and straightforward, but I would like the actions to be easier to understand for a regular person." | Low | Plainer action labels: #41, after submission |
 | Nov 23 | T1 (Joclyn, local app) | Team member (internal) | Check | 15 s | Found both of Sam's actions in the audit history | (same) | Low | #41 |
 | Nov 23 | T1 (Joclyn, local app) | Team member (internal) | Remove | 27 s | Revoked Sam's access; as Sam, edit_drafts was then blocked (`revoked`). `GET /audit/verify`: chain intact, 8 of 8 events | (same) | None | None |
+| Nov 23 | T2 (Andrew, local app) | Team member (internal) | Invite | 1 min 42 s (target under 2 min: met) | Invited Sam to edit drafts and approved it. The Starts field defaults to 5 minutes after the page loads, so as Sam the first edit_drafts was blocked (`not_started`); after the start time it was allowed, and manage_access was blocked (`role_forbids_task`) | "The process was not complicated and it was easy to navigate the app to create the invite link and to approve it and to revoke access." | Low | Default start of now + 5 min (`app/static/app.js`) surprises a "start now" invite: after submission, with #41 |
+| Nov 23 | T2 (Andrew, local app) | Team member (internal) | Check | 41 s | Found both of Sam's actions in the audit history | (same) | None | None |
+| Nov 23 | T2 (Andrew, local app) | Team member (internal) | Remove | 36 s | Revoked Sam's access; as Sam, edit_drafts was then blocked (`revoked`). Verify chain: intact, 8 of 8 events | (same) | None | None |
