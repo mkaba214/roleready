@@ -118,7 +118,41 @@ Both cases land on the right day with the right clock times. Only the zone is wr
 
 | Check | Target | Result | Date |
 | --- | --- | --- | --- |
-| `scripts/demo_journey.py` against Cloud Run | completes, chain ok | | |
-| Scheduler job runs, no duplicate expiry events (`scripts/metrics.sql` #3) | 0 rows | | |
-| Allowed actions after end (`scripts/metrics.sql` #1) | 0 | | |
-| Expiry job lag (`scripts/metrics.sql` #4) | under 90 s | | |
+| `scripts/demo_journey.py` against Cloud Run | completes, chain ok | Not run. The same journey was done by hand on the live app (below); Verify chain: intact, 67 events | Nov 23 |
+| Scheduler job runs, no duplicate expiry events (`scripts/metrics.sql` #3) | 0 rows | Runs every minute; 1 grant expired, exactly 1 `grant.expired` event | Nov 23 |
+| Allowed actions after end (`scripts/metrics.sql` #1) | 0 | 0, across 4 ended grants (1 expired, 3 revoked) | Nov 23 |
+| Expiry job lag (`scripts/metrics.sql` #4) | under 90 s | 2.8 s | Nov 23 |
+
+Counted from the live audit log (Firestore `audit_events`, read-only) and the Cloud Run request log, not by running `metrics.sql`. Joclyn's next `export_bigquery.py` run brings these events into the dashboard.
+
+### Nov 23 live run (Mohamed as owner, Andrew and Joclyn as invitees)
+
+Cloud Run revision `roleready-00004-gvz`. Times are UTC; ET is UTC-5.
+
+**Expiry.** Andrew, contributor, `edit_drafts` only, window 23:40-23:45 (America/New_York).
+
+| Step | Time | Result |
+| --- | --- | --- |
+| Invite created, then approved | 23:39:55, 23:39:59 | 4 s between them |
+| Andrew accepts | 23:40:41 | 42 s after approval |
+| `edit_drafts` inside the window | 23:41:00 | Allowed |
+| Window ends | 23:45:00 | |
+| Scheduler writes `grant.expired` | 23:45:02.8 | 2.8 s after the end, one event |
+| `edit_drafts` after the end | 23:48:21 | Blocked: `expired` |
+
+**Revoke.**
+
+| Step | Time | Result |
+| --- | --- | --- |
+| Owner revokes Andrew's grant (ending Nov 28) | 23:40:27.8 | |
+| Andrew clicks `edit_drafts` | 23:40:31.8 | Blocked: `revoked`, 4 s later |
+| Owner revokes Andrew's original grant (ending Nov 24) | 23:20:17 | |
+| Andrew clicks `edit_drafts` | 23:21:52 | Blocked: `revoked` |
+
+Joclyn's original grant (ending Dec 20) was also revoked, at 23:20:11. She got a new one at 00:01 on Nov 24 (window from 00:06), and her clicks at 00:02 and 00:05 were blocked as `not_started`, then allowed at 00:08. Both active grants now end Nov 28 around 00:01-00:04 UTC (Nov 27, about 7 PM ET).
+
+**Refusals seen in the same session:** 3 `wrong_user` (an invite opened while signed in under a different email), 1 `token_reused`, 2 Access Assistant drafts rejected by validation. Each was logged with its reason.
+
+**Invite time.** Create to approve took 2-4 s every time, and approve to accept took 22-46 s. The audit log doesn't record how long the owner spends filling in the form, so the usability measure still comes from the timed local run (45 s).
+
+**Audit chain.** Verify chain at 00:49 UTC on Nov 24: "Chain intact: 67 events verified" ([screenshot](evidence/live-audit-verify-2026-11-23.png)).
