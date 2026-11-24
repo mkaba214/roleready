@@ -20,7 +20,7 @@ Product brief: [docs/product-brief.md](docs/product-brief.md) · Open decisions:
 
 275 automated tests pass. Survey: 6 responses, usefulness 4.2 of 5. Details: [test results](docs/test-results.md), [feedback log](docs/feedback-log.md), [evidence](docs/evidence/).
 
-**Verified:** the measures above; a team member with project access gets `PERMISSION_DENIED` reading the NVIDIA key ([evidence](docs/evidence/README.md)); the audit chain check (sample and local runs).
+**Verified:** the measures above; a team member with project access gets `PERMISSION_DENIED` reading the NVIDIA key ([evidence](docs/evidence/README.md)); the audit chain check (sample, local and live runs; on the live app, 67 events intact on Nov 23); expiry and revoke on the live app (an expired grant was blocked and logged 2.8 s after its end, and a revoked one was blocked on the next click; [test results](docs/test-results.md#live-reliability-checks-week-3)).
 
 **Not claimed:** production readiness; results with real business owners (the survey reached mostly freelancers); the agent handling casual zone names like "LA time" (see [Known limitations](#known-limitations)).
 

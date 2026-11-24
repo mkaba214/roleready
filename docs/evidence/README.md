@@ -18,6 +18,10 @@ Re-plan after apply shows 1 change: the `roleready-integration-key` accessor bin
 
 - `iam-apply-2026-11-20.txt`: plan, apply, re-plan. One grant added, time-boxed to Dec 1. The re-plan shows the same two known leftovers as Nov 19 (integration-key binding, Editor on the default SA). The new grant took about 12 minutes to start working (`USER_PROJECT_DENIED` until then).
 
+## Live reliability checks (Nov 23)
+
+- `live-audit-verify-2026-11-23.png`: the live app's audit history after the Nov 23 expiry and revoke run (details in `docs/test-results.md`). Verify chain: "Chain intact: 67 events verified". The Actor column is blacked out.
+
 ## Dashboard
 
 - `dashboard-sample-data-2026-11-20.png` (Nov 20): the Data Studio report on sample data from a scripted run of the local app (D4). 187 task attempts (61 allowed, 126 blocked), all 6 grants ended (4 expired, 2 revoked), and the decision recheck found 0 disagreements.
