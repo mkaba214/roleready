@@ -16,7 +16,7 @@ Product brief: [docs/product-brief.md](docs/product-brief.md) · Open decisions:
 | Duplicate expiry events | 0 | 0 |
 | Grants without owner approval | 0 | 0 |
 | Agent drafts correct | 27 of 30 | 28 of 30 on every run since the Nov 10 prompt fixes (4 runs, Nov 10-19; [test results](docs/test-results.md)) |
-| Time to invite a freelancer | Under 2 min | 45 s (one internal run, local app) |
+| Time to invite a freelancer | Under 2 min | 45 s and 1 min 42 s (two internal runs, local app) |
 
 275 automated tests pass. Survey: 6 responses, usefulness 4.2 of 5. Details: [test results](docs/test-results.md), [feedback log](docs/feedback-log.md), [evidence](docs/evidence/).
 
