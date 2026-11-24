@@ -123,7 +123,7 @@ Both cases land on the right day with the right clock times. Only the zone is wr
 | Allowed actions after end (`scripts/metrics.sql` #1) | 0 | 0, across 4 ended grants (1 expired, 3 revoked) | Nov 23 |
 | Expiry job lag (`scripts/metrics.sql` #4) | under 90 s | 2.8 s | Nov 23 |
 
-Counted from the live audit log (Firestore `audit_events`, read-only) and the Cloud Run request log, not by running `metrics.sql`. Joclyn's next `export_bigquery.py` run brings these events into the dashboard.
+Counted from the live audit log (Firestore `audit_events`, read-only) and the Cloud Run request log, not by running `metrics.sql`. Joclyn's `export_bigquery.py` run on Nov 23 brought these events into the dashboard, and the safety checks there agree: 0 actions after end, 0 duplicate expiry events ([screenshot](evidence/dashboard-live-2026-11-23.png)).
 
 ### Nov 23 live run (Mohamed as owner, Andrew and Joclyn as invitees)
 
