@@ -473,7 +473,7 @@ class RoleReadyService:
     def success_metrics(self, actor: str) -> dict[str, Any]:
         """The brief's success measures, computed live from operational records.
 
-        This is the in-app dashboard. The BigQuery + Looker Studio export
+        This is the in-app dashboard. The BigQuery + Data Studio export
         (scripts/export_bigquery.py) gives the same numbers from a batch snapshot.
         """
         self.require_owner(actor)

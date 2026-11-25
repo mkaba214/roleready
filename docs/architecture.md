@@ -6,7 +6,7 @@ The policy engine decides access. The agent only proposes.
  Owner (Dana) ───────► ┌──────────── Cloud Run: FastAPI service ────────────┐ ──chat calls──► NVIDIA NIM API
                        │  Access Assistant (agent): drafts, explains audit  │                (build.nvidia.com)
  Freelancer ─────────► │  Policy engine: deny by default, checks the clock  │ ──verify token─► Firebase Auth
-                       │  Audit writer: append-only, hash-chained           │ ──read, write──► Firestore ──nightly──► BigQuery + Looker Studio
+                       │  Audit writer: append-only, hash-chained           │ ──read, write──► Firestore ──on demand──► BigQuery + Data Studio
  Cloud Scheduler ────► │  POST /jobs/expire: idempotent, fixed event IDs    │
  (every minute, OIDC)  │  Keys from Secret Manager                          │
                        └────────────────────────────────────────────────────┘
@@ -21,7 +21,7 @@ The policy engine decides access. The agent only proposes.
 | Firebase Authentication | Sign-in; server verifies ID tokens | `app/auth.py` |
 | Cloud Scheduler | Calls `/jobs/expire` every minute with an OIDC token | `infra/scheduler.sh`, `app/auth.py` |
 | Secret Manager | NVIDIA API key, mounted as an env var | `infra/setup.sh`, `infra/deploy.sh` |
-| BigQuery + Looker Studio | Success-measure dashboard | `scripts/export_bigquery.py`, `scripts/metrics.sql` |
+| BigQuery + Data Studio | Success-measure dashboard, refreshed when someone runs the export (no scheduled export) | `scripts/export_bigquery.py`, `scripts/metrics.sql` |
 | NVIDIA NIM (build.nvidia.com) | Access Assistant: draft invitations, explain the audit log | `app/llm.py`, `app/agent.py` |
 
 ## Request flow
