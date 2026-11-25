@@ -9,7 +9,8 @@ Floci (local practice, no account needed):
   python scripts/export_bigquery.py --project floci-local --emulator http://localhost:4588
 
 Creates dataset `roleready` and replaces table `audit_events` each run.
-Then open Looker Studio, add a BigQuery source, and use the queries in scripts/metrics.sql.
+Then open Data Studio, add a BigQuery source, and use the views in scripts/dashboard_views.sql
+and the queries in scripts/metrics.sql. Runs only when started; there is no scheduled export.
 """
 
 from __future__ import annotations

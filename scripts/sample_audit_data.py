@@ -3,7 +3,7 @@
 Acts out a busy week at Bloom & Crumb against a running RoleReady server in demo mode, then saves
 the audit log as newline-delimited JSON in the same columns as `scripts/export_bigquery.py`
 (table `roleready.audit_events`). Upload the file to BigQuery (a free BigQuery Sandbox works) and
-build Looker Studio charts from `scripts/metrics.sql` before the app is deployed to Google Cloud.
+build Data Studio charts from `scripts/metrics.sql` before the app is deployed to Google Cloud.
 
   uvicorn app.main:create_app --factory --env-file .env        # AUTH_MODE=demo, STORE_BACKEND=memory
   python scripts/sample_audit_data.py --out ~/roleready-sample/audit_events.jsonl

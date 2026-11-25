@@ -31,4 +31,4 @@ RoleReady gives a small business owner time-boxed, least-privilege access contro
 
 ## Team owners
 
-Mohamed (@mkaba214): cloud engineering, deploy, CI. Andrew (@dmandrew01): permission rules, Access Assistant, IAM, Firebase Auth, invite tokens, revoke, expiry job, threat model. Joclyn (@JDenise25): research, metrics, BigQuery + Looker Studio, evals, written docs. Reviewers per path: `.github/CODEOWNERS`.
+Mohamed (@mkaba214): cloud engineering, deploy, CI. Andrew (@dmandrew01): permission rules, Access Assistant, IAM, Firebase Auth, invite tokens, revoke, expiry job, threat model. Joclyn (@JDenise25): research, metrics, BigQuery + Data Studio, evals, written docs. Reviewers per path: `.github/CODEOWNERS`.
