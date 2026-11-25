@@ -62,7 +62,7 @@ Live check, Nov 10, with the app on the same build. `/agent/explain-audit` gave 
 
 ## Regression set (bug-fix cases, scored apart from the brief's 30)
 
-Run: `python -m evals.run_eval --set regression`. Cases live in `evals/regression_set.jsonl`, and each one names the issue it guards. They don't count toward the brief's 27-of-30 target, so that score still compares with earlier runs. Each case tests one bug only, so requests use calendar dates ("Nov 9") rather than weekday names, which the model sometimes resolves to the wrong day.
+Run: `python -m evals.run_eval --set regression`. Cases live in `evals/regression_set.jsonl`, and each one names the issue it guards (r03-r05 track a known gap instead; see below). They don't count toward the brief's 27-of-30 target, so that score still compares with earlier runs. Each case tests one bug only, so requests use calendar dates ("Nov 9") rather than weekday names, which the model sometimes resolves to the wrong day.
 
 | Case | Issue | Request | Correct draft |
 | --- | --- | --- | --- |
@@ -113,6 +113,27 @@ Both cases land on the right day with the right clock times. Only the zone is wr
 #15 fixed the app's part of #13: the app no longer switches zones because a name contains "Pacific" or "Mountain", and r02 now passes. r01 shows a second source of the same bug. The model reads "Pacific Coast" as a zone hint and returns a valid zone itself (`America/Los_Angeles` here, `Pacific` in the Nov 18 run that crashed). The app accepts any valid zone the model returns, so the +2 h shift survives. A possible fix is for the app to keep the workspace zone unless the owner's request names a zone next to a time, which is the same rule #15 applies to the app's own check. The owner still sees the zone and must approve, so no access is granted in the wrong window without the owner seeing it.
 
 **Fix (#29, Nov 19).** The app now keeps the model's zone only when the request mentions it: its IANA name ("America/Denver"), its city followed by "time" ("London time"), or an abbreviation ("PST", "ET"). Any other zone is a guess, so the draft uses the workspace zone and keeps the clock times the owner typed. A zone word next to a time ("5pm Pacific") still wins, as in #15. With the fix, r01 is 10am-2pm Chicago time whether the model answers `Pacific`, `America/Los_Angeles` or `America/Chicago`.
+
+
+**Known gap: casual zone names (r03-r05, added Nov 24).** The #30 review (Nov 19) found that the #29 rule also drops a zone the request *does* name in everyday words ("LA time", "UK time", lowercase "pst"), so the draft falls back to Chicago. The 30-case set can't see this, because its zone requests all say "Pacific time", "Eastern" and so on. These three cases measure the gap. They are labeled `#30 (known gap)` because they track an open problem, not a fixed bug, and they are expected to fail until it is fixed.
+
+| Case | Issue | Request | Correct draft |
+| --- | --- | --- | --- |
+| r03 | #30 (known gap) | "...edit drafts on Nov 9 from 10am to 2pm LA time." | Contributor, Mon Nov 9, 10am-2pm Los Angeles time |
+| r04 | #30 (known gap) | "...schedule posts on Nov 9 from 9am to 5pm UK time." | Contributor, Mon Nov 9, 9am-5pm London time |
+| r05 | #30 (known gap) | "...see analytics on Nov 9 from 8am to noon pst." | Viewer, Mon Nov 9, 8am-noon Los Angeles time |
+
+| Date | Code | Model | Passed | r01 | r02 | r03 | r04 | r05 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Nov 24, 2026 | main (after #30) | nvidia/nemotron-3.5-lightning-30b-a3b | 2/5 | PASS | PASS | FAIL | FAIL | FAIL |
+
+| Case | Expected | Draft | Off by |
+| --- | --- | --- | --- |
+| r03 | 10am-2pm Los Angeles (18:00-22:00 UTC) | 10am-2pm Chicago (`10:00-06:00`) | 2 h early |
+| r04 | 9am-5pm London (09:00-17:00 UTC) | 9am-5pm Chicago (`09:00-06:00`) | 6 h late |
+| r05 | 8am-noon Los Angeles (16:00-20:00 UTC) | 8am-noon Chicago (`08:00-06:00`) | 2 h early |
+
+Email, role, tasks and clock times are right in all three; only the zone is wrong, so each failure is this gap alone. r01 and r02 still pass. The scored draft can't show which zone the model first answered, because the app replaces it before scoring. Checked directly, the app's zone rule (`_request_mentions_zone` in `app/agent.py`, no model call) rejects Los Angeles and London for these three requests, so the drafts would fall back to Chicago even if the model named the right zone. Fix ideas from the #30 review, for after submission: match 3-letter abbreviations case-insensitively, and add a short alias list (LA, NYC, UK, Hawaii, Arizona). The owner still sees the zone before approving.
 
 ## Live reliability checks (Week 3)
 
