@@ -30,7 +30,7 @@ service_accounts:
     purpose: Identity inside the OIDC token Cloud Scheduler sends to /jobs/expire. Holds no project roles.
   roleready-export:
     display_name: RoleReady BigQuery export
-    purpose: Batch copy of audit events to BigQuery for the Looker Studio report.
+    purpose: Unused. Planned for the BigQuery export behind the Data Studio report, but scripts/export_bigquery.py runs with the caller's own login. Kept for the capstone; remove it and its binding after grading.
 
 team:
   mohamed:

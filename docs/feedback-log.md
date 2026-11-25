@@ -1,6 +1,6 @@
 # Feedback log (owner: Joclyn)
 
-Feedback the team received, and what changed because of it. Four sources: the user survey, the team's own testing and agent evaluation, code review, and internal timed runs. No names or contact details anywhere in this file: survey respondents are R1, R2..., and team members doing timed runs are T1, T2, T3. Severity: P1 blocks the journey or is a security risk, P2 gives a wrong result the owner might not notice, P3 is minor or rare.
+Feedback the team received, and what changed because of it. Four sources: the user survey, the team's own testing and agent evaluation, code review, and internal timed runs. No names or contact details anywhere in this file: survey respondents are R1, R2..., and team members doing timed runs are T1 and T2. Severity: P1 blocks the journey or is a security risk, P2 gives a wrong result the owner might not notice, P3 is minor or rare.
 
 ## 1. User survey
 
@@ -62,7 +62,7 @@ Feedback the team received, and what changed because of it. Four sources: the us
 
 The original plan called for five hands-on 30-minute sessions with first-time testers. On Nov 15 the team decided outside people would not use the app hands-on (D8). These are **internal runs by the team, not user sessions**. The team built the app, so times will be faster than a first-time user's.
 
-**Status:** agreed Nov 18: all three team members do one timed run, target under two minutes per invitation. The deployed app has one owner account, so runs by anyone else use the local app in demo mode (same screens). Joclyn's run: Nov 23, local. Andrew's run: Nov 23, local.
+**Status:** done: two timed runs, one each by Joclyn and Andrew (Nov 23, local app), target under two minutes per invitation. The Nov 18 plan had all three team members do one run; on Nov 24 we decided two runs were enough, so Mohamed did not do one. The deployed app has one owner account, so the runs used the local app in demo mode (same screens).
 
 **Script:**
 1. **Invite (timed):** as the owner, invite Sam for this week. Start when the invite form opens, stop when the invitation is approved.
