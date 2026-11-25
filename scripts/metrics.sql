@@ -1,4 +1,4 @@
--- Success-measure queries for Looker Studio (Joclyn). Replace PROJECT with your project id.
+-- Success-measure queries for Data Studio (Joclyn). Replace PROJECT with your project id.
 
 -- 1. Actions allowed after expiry or revoke. Target: 0.
 WITH ended AS (
