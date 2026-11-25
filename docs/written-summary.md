@@ -2,7 +2,7 @@
 
 **Team:** Mohamed Kaba (team lead), Andrew Hernandez, Joclyn Davis · **SDG 9:** Industry, Innovation and Infrastructure
 
-**Links:** [Live app](https://roleready-340875597178.us-central1.run.app) · [Repo](https://github.com/mkaba214/roleready) · [Deck](https://docs.google.com/presentation/d/1aTvrEI9q--rpzbtyc7soXvABASi0OtrS2Ib_diI0BXg/edit?usp=sharing) · [Video](https://docs.google.com/videos/d/10sclNvXOZUiKbHtelFMTCv8KvYpHXO-EXhyPRNLGIIg/play?usp=sharing) · [Dashboard](https://datastudio.google.com/reporting/6d62f470-2ef5-423b-9047-6fb74e6b0a22)
+**Links:** [Live app](https://roleready-340875597178.us-central1.run.app) · [Repo](https://github.com/mkaba214/roleready) · [Deck](https://docs.google.com/presentation/d/1aTvrEI9q--rpzbtyc7soXvABASi0OtrS2Ib_diI0BXg/edit?usp=sharing) · [Video](https://drive.google.com/file/d/1nvsFMnllCL_sLQoWUI4ajVx2pXCsPG5O/view?usp=sharing) · [Dashboard](https://datastudio.google.com/reporting/6d62f470-2ef5-423b-9047-6fb74e6b0a22)
 
 ## 1. Problem and objectives
 

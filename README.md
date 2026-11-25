@@ -3,7 +3,7 @@
 **Time-boxed, least-privilege access for small businesses that hire freelancers.**
 Team RoleReady · GCLP BUILD Capstone, Fall 2026 · UN SDG 9 (Industry, Innovation and Infrastructure)
 
-> Links: [Live demo](https://roleready-340875597178.us-central1.run.app) · [Deck (8 slides)](https://docs.google.com/presentation/d/1aTvrEI9q--rpzbtyc7soXvABASi0OtrS2Ib_diI0BXg/edit?usp=sharing) ([PDF](docs/deck.pdf)) · [Video (4 min 56 s)](https://docs.google.com/videos/d/10sclNvXOZUiKbHtelFMTCv8KvYpHXO-EXhyPRNLGIIg/play?usp=sharing) · [Written summary](docs/written-summary.md) · [Dashboard](https://datastudio.google.com/reporting/6d62f470-2ef5-423b-9047-6fb74e6b0a22) (Data Studio, live data; screenshots in [docs/evidence](docs/evidence/README.md))
+> Links: [Live demo](https://roleready-340875597178.us-central1.run.app) · [Deck (8 slides)](https://docs.google.com/presentation/d/1aTvrEI9q--rpzbtyc7soXvABASi0OtrS2Ib_diI0BXg/edit?usp=sharing) ([PDF](docs/deck.pdf)) · [Video (4 min 56 s)](https://drive.google.com/file/d/1nvsFMnllCL_sLQoWUI4ajVx2pXCsPG5O/view?usp=sharing) · [Written summary](docs/written-summary.md) · [Dashboard](https://datastudio.google.com/reporting/6d62f470-2ef5-423b-9047-6fb74e6b0a22) (Data Studio, live data; screenshots in [docs/evidence](docs/evidence/README.md))
 
 Product brief: [docs/product-brief.md](docs/product-brief.md) · Open decisions: [docs/decisions.md](docs/decisions.md)
 
